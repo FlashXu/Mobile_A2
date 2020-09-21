@@ -7,3 +7,10 @@
 * [Ruocheng Ning - 1106219]
 * [Yizi Han - 1045234](https://github.com/YiziH)
 * [Jiawei Ren - 1130796](https://github.com/JiaweiRenUBC)
+
+## Google Cloud Instance:
+* IP and Port: [http://www.mobileappproj.ml:5984/](http://www.mobileappproj.ml:5984/) or [http://35.220.242.6:5984/](http://35.220.242.6:5984/)  
+* Futon Page: [http://www.mobileappproj.ml:5984/_utils/](http://www.mobileappproj.ml:5984/_utils/) 
+
+## Backend Files
+* `db_op.py`  - Basic control of the database.
