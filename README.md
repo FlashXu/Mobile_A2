@@ -11,6 +11,15 @@
 ## Google Cloud Instance:
 * IP and Port: [http://www.mobileappproj.ml:5984/](http://www.mobileappproj.ml:5984/) or [http://35.220.242.6:5984/](http://35.220.242.6:5984/)  
 * Futon Page: [http://www.mobileappproj.ml:5984/_utils/](http://www.mobileappproj.ml:5984/_utils/) 
+* Request Respondse URL: http://www.mobileappproj.ml:5000
 
 ## Backend Files
-* `db_op.py`  - Basic control of the database.
+* `app.py` - Flask entry of the database.
+* `db_op.py` - Basic control of the database.
+* `accounts.py` - Basic control and Flask response of the database "accounts".
+* `personal_info.py` - Basic control and Flask response of the database "personal_info".
+* `friends_list.py` - Basic control and Flask response of the database "friends_list".
+* `online_info.py` - Basic control and Flask response of the database "online_info".
+* `running_record.py` - Basic control and Flask response of the database "running_record".
+* `moments.py` - Basic control and Flask response of the database "moments".
+* `distance.py` - Basic control and Flask response of the database "distance.
