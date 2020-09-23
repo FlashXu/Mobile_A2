@@ -49,7 +49,7 @@ def db_online_info(db_server, operation, id ='', status =''):
 # Flask for accounts.
 online_info_handler = Blueprint('online_info', __name__)
 db_server = db_op.get_server()
-@online_info_handler .route('', methods=['DELETE', 'PUT', 'GET'])
+@online_info_handler .route('', methods=['DELETE', 'PUT'])
 def resp_online_info():
     response = {}
     data = eval(str(request.data, encoding="utf-8"))
@@ -64,7 +64,11 @@ def resp_online_info():
         resp = db_online_info(db_server, 'update', id = id, status = status)
         response['resp'] = resp
         return response
-    elif request.method == 'GET':
+
+@online_info_handler.route('/get_online_list', methods=['POST'])
+def resp_online_list():
+        response = {}
+        data = eval(str(request.data, encoding="utf-8"))
         id = data['_id']
         resp, status_list = db_online_info(db_server, 'get', id = id )
         response['resp'] = resp

@@ -54,32 +54,38 @@ db_server = db_op.get_server()
 @accounts_handler.route('', methods=['POST', 'DELETE', 'PUT', 'GET'])
 def resp_account():
     response = {}
-    data = eval(str(request.data, encoding="utf-8"))
     if request.method == 'POST':
+        data = eval(str(request.data, encoding="utf-8"))
         resp, gen_id = db_accounts(db_server, 'create', data = data)
         response['resp'] = resp
         response['gen_id'] = gen_id
         return response
     elif request.method == 'DELETE':
+        data = eval(str(request.data, encoding="utf-8"))
         id = data['_id']
         resp = db_accounts(db_server, 'delete', id = id)
         response['resp'] = resp
         return response
     elif request.method == 'PUT':
+        data = eval(str(request.data, encoding="utf-8"))
         resp = db_accounts(db_server, 'update', data = data)
         response['resp'] = resp
         return response
     elif request.method == 'GET':
-        if 'auth' in data.keys():
-            resp, gen_id = db_accounts(db_server, 'auth', data = data)
-            response['resp'] = resp
-            response['gen_id'] = gen_id
-            return response
-        else:
-            id = data['_id']
-            resp, account_info = db_accounts(db_server, 'get', id = id)
-            response['resp'] = resp
-            response['account_info'] = account_info
-            return response
+        id = request.args.get('id')
+        resp, account_info = db_accounts(db_server, 'get', id = id)
+        response['resp'] = resp
+        response['account_info'] = account_info
+        return response
+
+@accounts_handler.route('/auth', methods=['POST'])
+def resp_account_auth():
+    response = {}
+    data = eval(str(request.data, encoding="utf-8"))
+    resp, gen_id = db_accounts(db_server, 'auth', data=data)
+    response['resp'] = resp
+    response['gen_id'] = gen_id
+    return response
+
 
 

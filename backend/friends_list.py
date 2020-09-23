@@ -75,18 +75,21 @@ db_server = db_op.get_server()
 @friends_list_handler.route('', methods=['POST', 'DELETE', 'PUT', 'GET'])
 def resp_friends_list():
     response = {}
-    data = eval(str(request.data, encoding="utf-8"))
+
     # Create new friends list.
     if request.method == 'POST':
+        data = eval(str(request.data, encoding="utf-8"))
         resp = db_friends_list(db_server, 'add', data=data)
         response['resp'] = resp
         return response
     elif request.method == 'DELETE':
+        data = eval(str(request.data, encoding="utf-8"))
         id = data['_id']
         resp = db_friends_list(db_server, 'delete_all', id=id)
         response['resp'] = resp
         return response
     elif request.method == 'PUT':
+        data = eval(str(request.data, encoding="utf-8"))
         operation = data['operation']
         if operation == "add":
             resp = db_friends_list(db_server, 'add', data=data)
@@ -95,7 +98,7 @@ def resp_friends_list():
         response['resp'] = resp
         return response
     elif request.method == 'GET':
-        id = data['_id']
+        id = request.args.get('id')
         resp, f_list = db_friends_list(db_server, 'get', id=id)
         response['resp'] = resp
         response['friends_list'] = f_list

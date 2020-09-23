@@ -127,23 +127,25 @@ db_server = db_op.get_server()
 @distance_handler.route('', methods=['POST', 'DELETE', 'PUT', 'GET'])
 def resp_distance ():
     response = {}
-    data = eval(str(request.data, encoding="utf-8"))
 
     if request.method == 'POST':
+        data = eval(str(request.data, encoding="utf-8"))
         resp = db_distance(db_server, 'create', data = data)
         response['resp'] = resp
         return response
     elif request.method == 'DELETE':
+        data = eval(str(request.data, encoding="utf-8"))
         id = data['_id']
         resp = db_distance(db_server, 'delete', id = id)
         response['resp'] = resp
         return response
     elif request.method == 'PUT':
+        data = eval(str(request.data, encoding="utf-8"))
         resp = db_distance(db_server, 'update', data = data)
         response['resp'] = resp
         return response
     elif request.method == 'GET':
-        id = data['_id']
+        id = request.args.get('id')
         resp, record_detail = db_distance(db_server, 'get', id = id)
         response['resp'] = resp
         response['record_detail'] = record_detail
@@ -153,8 +155,7 @@ def resp_distance ():
 @distance_handler.route('/weekly_ranking', methods=['GET'])
 def resp_weekly_ranking ():
     response = {}
-    data = eval(str(request.data, encoding="utf-8"))
-    id = data['_id']
+    id = request.args.get('id')
     _, friends_list = db_friends_list(db_server, 'get', id = id)
     friends_list.append(id)
     # Make sure uniqueness.

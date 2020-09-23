@@ -23,3 +23,6 @@
 * `running_record.py` - Basic control and Flask response of the database "running_record".
 * `moments.py` - Basic control and Flask response of the database "moments".
 * `distance.py` - Basic control and Flask response of the database "distance.
+
+## API file
+[Link:https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0](https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0)

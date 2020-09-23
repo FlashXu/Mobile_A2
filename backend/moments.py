@@ -22,7 +22,6 @@ def db_moments(db_server, operation, id = '', query_key=[], data = {}):
             doc = db[id]
             new_content = dict(doc)
             del data['_id']
-            del data['type']
             new_content['comments'].append(data)
             del new_content['_rev']
             db.purge([doc])
@@ -42,6 +41,7 @@ def db_moments(db_server, operation, id = '', query_key=[], data = {}):
         for row in record_list:
             doc = db[row.value]
             record_detail.append(dict(doc))
+        print(record_detail)
         return 200, record_detail
 
     # Get moments by id.
@@ -70,40 +70,47 @@ db_server = db_op.get_server()
 @moments_handler.route('', methods=['POST', 'DELETE', 'GET'])
 def resp_moments():
     response = {}
-    data = eval(str(request.data, encoding="utf-8"))
-    if request.method == 'POST':
-        type = data['type']
-        if type == "comment":
-            resp = db_moments(db_server, 'comment', data = data)
-            response['resp'] = resp
-            return response
-        else:
-            resp, gen_id = db_moments(db_server, 'create', data=data)
-            response['resp'] = resp
-            response['gen_id'] = gen_id
-            return response
 
+    if request.method == 'POST':
+        data = eval(str(request.data, encoding="utf-8"))
+        resp, gen_id = db_moments(db_server, 'create', data = data)
+        response['resp'] = resp
+        response['gen_id'] = gen_id
+        return response
     elif request.method == 'DELETE':
-        type = data['type']
-        if type == "delete_by_id":
-            id = data['_id']
-            resp = db_moments(db_server, 'delete_by_id', id = id)
-        else:
-            query_key = data['query_key']
-            resp = db_moments(db_server, 'delete_by_query', query_key = query_key)
+        data = eval(str(request.data, encoding="utf-8"))
+        id = data['_id']
+        resp = db_moments(db_server, 'delete_by_id', id = id)
         response['resp'] = resp
         return response
-
     elif request.method == 'GET':
-        type = data['type']
-        if type == "get_by_id":
-            id = data['_id']
-            resp, record_detail = db_moments(db_server, 'get_by_id', id=id)
-        else:
-            query_key = data['query_key']
-            resp, record_detail = db_moments(db_server, 'get_by_query', query_key=query_key)
+        id = request.args.get('id')
+        resp, record_detail = db_moments(db_server, 'get_by_id', id=id)
         response['resp'] = resp
         response['record_detail'] = record_detail
+        return response
+
+@moments_handler.route('/comment', methods=['POST'])
+def resp_moments_comment():
+    response = {}
+    data = eval(str(request.data, encoding="utf-8"))
+    resp = db_moments(db_server, 'comment', data=data)
+    response['resp'] = resp
+    return response
+
+@moments_handler.route('/query', methods=['POST', 'DELETE'])
+def resp_moments_query():
+    response = {}
+    data = eval(str(request.data, encoding="utf-8"))
+    query_key = data['query_key']
+    if request.method == 'POST':
+        resp, record_detail = db_moments(db_server, 'get_by_query', query_key=query_key)
+        response['resp'] = resp
+        response['record_detail'] = record_detail
+        return response
+    elif request.method == 'DELETE':
+        resp = db_moments(db_server, 'delete_by_query', query_key=query_key)
+        response['resp'] = resp
         return response
 
 
