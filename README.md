@@ -27,5 +27,5 @@
 
 
 ## API file
-[API file: https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0](https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0)
-[API deployment: http://www.mobileappproj.ml:8080/ui](http://www.mobileappproj.ml:8080/ui)
+* [API file: https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0](https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0)
+* [API deployment: http://www.mobileappproj.ml:8080/ui](http://www.mobileappproj.ml:8080/ui)
