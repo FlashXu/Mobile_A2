@@ -7,9 +7,11 @@ from online_info import online_info_handler
 from running_record import running_record_handler
 from moments import moments_handler
 from distance import distance_handler
+from flask_cors import CORS
 import db_op
 
 app = Flask(__name__)
+CORS(app)
 db_server = db_op.get_server()
 app.register_blueprint(accounts_handler, url_prefix='/accounts')
 app.register_blueprint(personal_info_handler, url_prefix='/personal_info')
