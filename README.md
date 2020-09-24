@@ -23,6 +23,9 @@
 * `running_record.py` - Basic control and Flask response of the database "running_record".
 * `moments.py` - Basic control and Flask response of the database "moments".
 * `distance.py` - Basic control and Flask response of the database "distance.
+* `python-flask-server-generated` - Swagger API server of the database.
+
 
 ## API file
-[Link:https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0](https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0)
+[API file: https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0](https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0)
+[API deployment: http://www.mobileappproj.ml:8080/ui](http://www.mobileappproj.ml:8080/ui)
