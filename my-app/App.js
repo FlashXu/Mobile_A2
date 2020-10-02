@@ -1,68 +1,100 @@
-import React from "react";
-import { Pedometer } from "expo-legacy";
-import { StyleSheet, Text, View, Button } from "react-native";
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Gyroscope } from 'expo-sensors';
 
+export default function App() {
+  const [data, setData] = useState({});
 
+  useEffect(() => {
+    _toggle();
+  }, []);
 
-export default class App extends React.Component {
-  state = {
-    isPedometerAvailable: "checking",
-    pastStepCount: 0,
-    currentStepCount: 0
+  useEffect(() => {
+    return () => {
+      _unsubscribe();
+    };
+  }, []);
+
+  const _toggle = () => {
+    if (this._subscription) {
+      _unsubscribe();
+    } else {
+      _subscribe();
+    }
   };
 
-  componentWillUnmount() {
+  const _slow = () => {
+    Gyroscope.setUpdateInterval(1000);
+  };
+
+  const _fast = () => {
+    Gyroscope.setUpdateInterval(16);
+  };
+
+  const _subscribe = () => {
+    this._subscription = Gyroscope.addListener(gyroscopeData => {
+      setData(gyroscopeData);
+    });
+  };
+
+  const _unsubscribe = () => {
     this._subscription && this._subscription.remove();
-    delete this._subscription;
-  }
-
-  init = async () => {
-    let isPedometerAvailable = false;
-    try {
-      isPedometerAvailable = await Pedometer.isAvailableAsync();
-      this.setState({ isPedometerAvailable: String(isPedometerAvailable) });
-    } catch ({ message }) {
-      this.setState({ isPedometerAvailable: `Could not get isPedometerAvailable: ${message}` });
-    }
-    if (isPedometerAvailable) {
-      this._subscription = Pedometer.watchStepCount(result => {
-        this.setState({
-          currentStepCount: result.steps
-        });
-      });
-      const end = new Date();
-      const start = new Date();
-      start.setDate(end.getDate() - 1);
-      try {
-        const { steps } = await Pedometer.getStepCountAsync(start, end);
-        this.setState({ pastStepCount: steps });
-      } catch ({ message }) {
-        this.setState({ pastStepCount: `Could not get stepCount: ${message}` });
-      }
-    }
+    this._subscription = null;
   };
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <Text>
-          Pedometer.isAvailableAsync(): {this.state.isPedometerAvailable}
-        </Text>
-        <Text>
-          Steps taken in the last 24 hours: {this.state.pastStepCount}
-        </Text>
-        <Text>Walk! And watch this go up: {this.state.currentStepCount}</Text>
-        <Button title="INIT" onPress={this.init} />
+  let { x, y, z } = data;
+  return (
+    <View style={styles.sensor}>
+      <Text style={styles.text}>Gyroscope:</Text>
+      <Text style={styles.text}>
+        x轴: {round(x)} y轴: {round(y)} z轴: {round(z)}
+      </Text>
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={_toggle} style={styles.button}>
+          <Text>启动/暂停</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={_slow} style={[styles.button, styles.middleButton]}>
+          <Text>慢速显示</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={_fast} style={styles.button}>
+          <Text>高速显示</Text>
+        </TouchableOpacity>
       </View>
-    );
+    </View>
+  );
+}
+
+function round(n) {
+  if (!n) {
+    return 0;
   }
+
+  return Math.floor(n * 100) / 100;
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  buttonContainer: {
+    flexDirection: 'row',
+    alignItems: 'stretch',
     marginTop: 15,
-    alignItems: "center",
-    justifyContent: "center"
-  }
+  },
+  button: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#eee',
+    padding: 10,
+  },
+  middleButton: {
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: '#ccc',
+  },
+  sensor: {
+    marginTop: 45,
+    paddingHorizontal: 10,
+  },
+  text: {
+    textAlign: 'center',
+  },
 });
