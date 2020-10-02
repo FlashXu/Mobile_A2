@@ -24,6 +24,7 @@
 * `moments.py` - Basic control and Flask response of the database "moments".
 * `distance.py` - Basic control and Flask response of the database "distance.
 * `python-flask-server-generated` - Swagger API server of the database.
+* `db_req_demo.js` - db demon with react native code.
 
 
 ## API file
