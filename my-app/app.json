@@ -13,18 +13,20 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
-	"android": {
-      "package": "host.exp.exponent"
+    "android": {
+      "package": "host.exp.exponent",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCZuivSjdsruDCZdoiKguPc5okNIBntDco"
+        }
+      }
     }
   }
 }
-
