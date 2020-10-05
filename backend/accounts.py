@@ -1,6 +1,7 @@
 from flask import Flask, request, Blueprint
 from couchdb import ResourceConflict, ResourceNotFound
 import db_op
+import forget_pwd
 
 # Handle database
 def db_accounts(db_server, operation, id = '', data = {}):
@@ -78,6 +79,7 @@ def resp_account():
         response['account_info'] = account_info
         return response
 
+# Handling login.
 @accounts_handler.route('/auth', methods=['POST'])
 def resp_account_auth():
     response = {}
@@ -86,6 +88,24 @@ def resp_account_auth():
     response['resp'] = resp
     response['gen_id'] = gen_id
     return response
+
+# Handing forget password.
+@accounts_handler.route('/forget_pwd', methods=['GET', 'POST'])
+def resp_account_forgetpwd():
+    response = {}
+    if request.method == 'GET':
+        user_name = request.args.get('user_name')
+        resp = forget_pwd.verify_step1(db_server, user_name)
+        response['resp'] = resp
+        return response
+    elif request.method == 'POST':
+        data = eval(str(request.data, encoding="utf-8"))
+        user_name = data['user_name']
+        verify_code = data['verify_code']
+        resp, id = forget_pwd.verify_step2(db_server, user_name, verify_code)
+        response['resp'] = resp
+        response['gen_id'] = id
+        return response
 
 
 

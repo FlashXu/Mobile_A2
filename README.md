@@ -4,7 +4,7 @@
 * [Minghui Li - 1156921](https://github.com/lmh1993)
 * [Yichao Xu - 1045184](https://github.com/FlashXu)
 * [Ye Yang - 1087176](https://github.com/Ace2YY)
-* [Ruocheng Ning - 1106219]
+* [Ruocheng Ning - 1106219](https://github.com/Irrela)
 * [Yizi Han - 1045234](https://github.com/YiziH)
 * [Jiawei Ren - 1130796](https://github.com/JiaweiRenUBC)
 
@@ -14,7 +14,7 @@
 * Request Respondse URL: http://www.mobileappproj.ml:5000
 
 ## Backend Files
-* `app.py` - Flask entry of the database.
+* `app.py` - Async Flask entry of the database.
 * `db_op.py` - Basic control of the database.
 * `accounts.py` - Basic control and Flask response of the database "accounts".
 * `personal_info.py` - Basic control and Flask response of the database "personal_info".
@@ -22,7 +22,9 @@
 * `online_info.py` - Basic control and Flask response of the database "online_info".
 * `running_record.py` - Basic control and Flask response of the database "running_record".
 * `moments.py` - Basic control and Flask response of the database "moments".
-* `distance.py` - Basic control and Flask response of the database "distance.
+* `distance.py` - Basic control and Flask response of the database "distance".
+* `attachments.py` - Basic control and Flask response of the function attachments.
+* `forget_pwd.py` - Basic control and Flask response of the function forget password.
 * `python-flask-server-generated` - Swagger API server of the database.
 * `db_req_demo.js` - db demon with react native code.
 
