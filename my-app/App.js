@@ -1,29 +1,49 @@
 import React from "react";
-import { Text, TouchableOpacity, StyleSheet, View, Dimensions } from "react-native";
-import * as TaskManager from "expo-task-manager";
-import * as Location from "expo-location";
+import {
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  View,
+  Dimensions,
+  ActivityIndicator,
+} from "react-native";
 
-const LOCATION_TASK_NAME = "background-location-task";
+export default class APP extends React.Component {
+  constructor(props) {
+    this.state = {
+      isLoading: true,
+      dataSource: null,
+    };
+  }
 
-export default class Component extends React.Component {
-  onPress = async () => {
-
-    // console.log("on press works!");
-
-    const { status } = await Location.requestPermissionsAsync();
-    if (status === "granted") {
-      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-        accuracy: Location.Accuracy.Balanced,
+  componentDidMount() {
+    return fetch(
+      "http://www.mobileappproj.ml:5000/running_record?id=139cead802d001cef8a21b6c760a6e64"
+    )
+      .then((response) => response.json())
+      .then((responseJSON) => {
+        this.setState({
+          isLoading: false,
+          dataSource: responseJSON.record_detail,
+        });
+      })
+      .catch((error) => {
+        console.log(error);
       });
-    }
-  };
+  }
 
   render() {
+    if (isLoading) {
+      return (
+        <View style={styles.container}>
+          <ActivityIndicator />
+        </View>
+      );
+    }
+
     return (
-      <View style = {styles.container}>
-        <TouchableOpacity onPress={this.onPress}>
-          <Text>Enable background location</Text>
-        </TouchableOpacity>
+      <View style={styles.container}>
+        <Text>Content Loaded</Text>
       </View>
     );
   }
@@ -31,24 +51,11 @@ export default class Component extends React.Component {
 
 const styles = StyleSheet.create({
   container: {
-    justifyContent:'center',
-    alignItems:'center',
-    position:'absolute',
-    height:Dimensions.get('window').height,
-    width:Dimensions.get('window').width,
-    zIndex:10,
-  }
-});
-
-TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
-  if (error) {
-    // Error occurred - check `error.message` for more details.
-    return;
-  }
-  if (data) {
-    const { locations } = data;
-
-    // do something with the locations captured in the background
-    console.log(locations);
-  }
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    height: Dimensions.get("window").height,
+    width: Dimensions.get("window").width,
+    zIndex: 10,
+  },
 });
