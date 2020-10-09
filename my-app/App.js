@@ -7,60 +7,34 @@ import {
   Dimensions,
   ActivityIndicator,
 } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
+import Home from './components/Home'
+import PostResult from './components/PostResult'
+import GetResult from './components/GetResult'
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 
-function Item({ coordinate }) {
+const Stack = createStackNavigator();
+
+function HomeScreen() {
   return (
-    <View style={styles.item}>
-      <Text style={styles.title}>{coordinate}</Text>
-    </View>
+    <Home/>
+  );
+}
+function PostResultScreen() {
+  return (
+    <PostResult/>
   );
 }
 
 export default class APP extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isLoading: true,
-      dataSource: null,
-    };
-  }
-
-  componentDidMount() {
-    return fetch(
-      "http://www.mobileappproj.ml:5000/running_record?id=139cead802d001cef8a21b6c760a6e64"
-    )
-      .then((response) => response.json())
-      .then((responseJSON) => {
-        this.setState({
-          isLoading: false,
-          dataSource: responseJSON.record_detail,
-        });
-        console.log(this.state.dataSource);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
   render() {
-    if (this.state.isLoading) {
-      return (
-        <View style={styles.container}>
-          <ActivityIndicator />
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.container}>
-          <FlatList
-            data={this.state.dataSource}
-            renderItem={({ item }) => <Item coordinate={item.coordinate} />}
-            keyExtractor={item => item._id}
-          />
-        </View>
-      );
-    }
+    return (
+      <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+    );
   }
 }
 
