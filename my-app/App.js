@@ -56,7 +56,7 @@ export default class APP extends React.Component {
           <FlatList
             data={this.state.dataSource}
             renderItem={({ item }) => <Item coordinate={item.coordinate} />}
-            keyExtractor={(item) => item._id}
+            keyExtractor={item => item._id}
           />
         </View>
       );
