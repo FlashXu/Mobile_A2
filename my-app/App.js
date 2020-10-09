@@ -7,9 +7,11 @@ import {
   Dimensions,
   ActivityIndicator,
 } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 
 export default class APP extends React.Component {
   constructor(props) {
+    super(props);
     this.state = {
       isLoading: true,
       dataSource: null,
@@ -26,6 +28,7 @@ export default class APP extends React.Component {
           isLoading: false,
           dataSource: responseJSON.record_detail,
         });
+        console.log(this.state.dataSource);
       })
       .catch((error) => {
         console.log(error);
@@ -33,19 +36,23 @@ export default class APP extends React.Component {
   }
 
   render() {
-    if (isLoading) {
+    if (this.state.isLoading) {
       return (
         <View style={styles.container}>
           <ActivityIndicator />
         </View>
       );
-    }
+    }else {
 
-    return (
-      <View style={styles.container}>
-        <Text>Content Loaded</Text>
-      </View>
-    );
+      return (
+        <View style={styles.container}>
+          <FlatList 
+          data = {this.state.dataSource}
+          renderItem={({item}) => <Text>{item._id}</Text>}
+          />
+        </View>
+      );
+    }
   }
 }
 
@@ -57,5 +64,9 @@ const styles = StyleSheet.create({
     height: Dimensions.get("window").height,
     width: Dimensions.get("window").width,
     zIndex: 10,
+  },
+  item:{
+    flex:1,
+    alignSelf:'stretch',
   },
 });
