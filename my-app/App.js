@@ -9,6 +9,14 @@ import {
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
+function Item({ coordinate }) {
+  return (
+    <View style={styles.item}>
+      <Text style={styles.title}>{coordinate}</Text>
+    </View>
+  );
+}
+
 export default class APP extends React.Component {
   constructor(props) {
     super(props);
@@ -42,13 +50,13 @@ export default class APP extends React.Component {
           <ActivityIndicator />
         </View>
       );
-    }else {
-
+    } else {
       return (
         <View style={styles.container}>
-          <FlatList 
-          data = {this.state.dataSource}
-          renderItem={({item}) => <Text>{item._id}</Text>}
+          <FlatList
+            data={this.state.dataSource}
+            renderItem={({ item }) => <Item coordinate={item.coordinate} />}
+            keyExtractor={(item) => item._id}
           />
         </View>
       );
@@ -65,8 +73,13 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width,
     zIndex: 10,
   },
-  item:{
-    flex:1,
-    alignSelf:'stretch',
+  item: {
+    backgroundColor: "#f9c2ff",
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 16,
+  },
+  title: {
+    fontSize: 32,
   },
 });
