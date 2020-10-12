@@ -6,19 +6,10 @@ import {
   View,
   Dimensions,
   ActivityIndicator,
+  Button,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-
-
-function Item({ coordinate }) {
-  return (
-    <View style={styles.item}>
-      <Text style={styles.title}>{coordinate}</Text>
-    </View>
-  );
-}
-
-
+import { FriendsContext } from "./FriendsContext";
 
 export default class Home extends React.Component {
   constructor(props) {
@@ -29,42 +20,25 @@ export default class Home extends React.Component {
     };
   }
 
-  componentDidMount() {
-    
-    return fetch(
-      "http://www.mobileappproj.ml:5000/running_record?id=139cead802d001cef8a21b6c760a6e64"
-    )
-      .then((response) => response.json())
-      .then((responseJSON) => {
-        this.setState({
-          isLoading: false,
-          dataSource: responseJSON.record_detail,
-        });
-        //console.log(this.state.dataSource);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
-
   render() {
-    if (this.state.isLoading) {
+
+    //navigation
       return (
-        <View style={styles.container}>
-          <ActivityIndicator />
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.container}>
-          <FlatList
-            data={this.state.dataSource}
-            renderItem={({ item }) => <Item coordinate={item.coordinate} />}
-            keyExtractor={item => item._id}
+          <View style={styles.container}>
+
+      <Text>Current friends in list : {this.context.currentFriends.length}</Text>
+          <Button 
+            title = "GetResult"
+            onPress = {() => this.props.navigation.navigate("GetResultScreen")}
           />
-        </View>
+          <Button 
+            title = "PostResultScreen"
+            onPress = {() => this.props.navigation.navigate("PostResultScreen")}
+          />
+          <Text>11</Text>
+          </View>
+
       );
-    }
   }
 }
 

@@ -6,6 +6,7 @@ import {
   View,
   Dimensions,
   ActivityIndicator,
+  Button,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
@@ -13,7 +14,20 @@ import { FlatList } from "react-native-gesture-handler";
 export default class GetResult extends React.Component {
 
   render() {
-    return <Text>getResult</Text>
+    return(
+      <View style={styles.container}>
+        <View style={styles.container}>
+            <Button 
+              title = "Home"
+              onPress = {() => this.props.navigation.navigate("HomeScreen")}
+            />
+            <Text>11</Text>
+          </View>
+      </View>
+
+      
+      
+    )
   }
 }
 

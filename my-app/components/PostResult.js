@@ -76,6 +76,14 @@ export default class PostResult extends React.Component {
             renderItem={({ item }) => <Item coordinate={item.gen_id} />}
             keyExtractor={item => item.gen_id}
           />
+
+          <View style={styles.container}>
+            <Button 
+              title = "Back"
+              onPress = {() => this.props.navigation.navigate("HomeScreen")}
+            />
+            <Text>11</Text>
+          </View>
         </View>
       );
     }
