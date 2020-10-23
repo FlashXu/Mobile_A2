@@ -9,23 +9,17 @@ import {
 } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import {FriendsContext} from './components/FriendsContext';
 import HomeScreen from './components/Home';
 import PostResultScreen from './components/PostResult';
 import GetResultScreen from './components/GetResult';
+import LocationDataScreen from './components/LocationData';
+
 
 const Stack = createStackNavigator();
 
 
 export default class APP extends React.Component {
 
-  constructor(props){
-    super(props);
-    this.state = {
-      possibleFriends:['Alice','Bob','Sammy'],
-      currentFriends:[],
-    };
-  }
 
   render() {
     return (
@@ -35,6 +29,7 @@ export default class APP extends React.Component {
         <Stack.Screen name="HomeScreen" component={HomeScreen} />
         <Stack.Screen name="GetResultScreen" component={GetResultScreen} />
         <Stack.Screen name="PostResultScreen" component={PostResultScreen} />
+        <Stack.Screen name="LocationDataScreen" component={LocationDataScreen} />
       </Stack.Navigator>
     </NavigationContainer>
     );

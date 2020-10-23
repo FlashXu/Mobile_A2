@@ -9,9 +9,16 @@ import {
   Button,
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
-import { FriendsContext } from "./FriendsContext";
 
 export default class Home extends React.Component {
+
+  onPress = async () => {
+
+    console.log("on press works!");
+
+    this.props.navigation.navigate("GetResultScreen")
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -25,15 +32,19 @@ export default class Home extends React.Component {
     //navigation
       return (
           <View style={styles.container}>
-
-      <Text>Current friends in list : {this.context.currentFriends.length}</Text>
           <Button 
             title = "GetResult"
-            onPress = {() => this.props.navigation.navigate("GetResultScreen")}
+            onPress = {this.onPress}
           />
+          <Text>11</Text>
           <Button 
             title = "PostResultScreen"
             onPress = {() => this.props.navigation.navigate("PostResultScreen")}
+          />
+          <Text>11</Text>
+          <Button 
+            title = "LocationDataScreen"
+            onPress = {() => this.props.navigation.navigate("LocationDataScreen")}
           />
           <Text>11</Text>
           </View>
