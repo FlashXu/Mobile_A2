@@ -8,7 +8,6 @@ import {
   ActivityIndicator,
   Button,
 } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 
 export default class Home extends React.Component {
 
@@ -45,6 +44,14 @@ export default class Home extends React.Component {
           <Button 
             title = "LocationDataScreen"
             onPress = {() => this.props.navigation.navigate("LocationDataScreen")}
+          />
+          <Button 
+            title = "accelerometer"
+            onPress = {() => this.props.navigation.navigate("accelerometer")}
+          />
+          <Button 
+            title = "SaveandUpload"
+            onPress = {() => this.props.navigation.navigate("SaveandUpload")}
           />
           <Text>11</Text>
           </View>

@@ -1,11 +1,7 @@
 import React from "react";
 import {
-  Text,
-  TouchableOpacity,
   StyleSheet,
-  View,
   Dimensions,
-  ActivityIndicator,
 } from "react-native";
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,7 +9,7 @@ import HomeScreen from './components/Home';
 import PostResultScreen from './components/PostResult';
 import GetResultScreen from './components/GetResult';
 import LocationDataScreen from './components/LocationData';
-
+import SaveandUpload from './components/SaveandUpload';
 
 const Stack = createStackNavigator();
 
@@ -30,6 +26,7 @@ export default class APP extends React.Component {
         <Stack.Screen name="GetResultScreen" component={GetResultScreen} />
         <Stack.Screen name="PostResultScreen" component={PostResultScreen} />
         <Stack.Screen name="LocationDataScreen" component={LocationDataScreen} />
+        <Stack.Screen name="SaveandUpload" component={SaveandUpload} />
       </Stack.Navigator>
     </NavigationContainer>
     );
