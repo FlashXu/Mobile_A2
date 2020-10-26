@@ -3,16 +3,10 @@ import {
     StyleSheet,
     View,
     Text,
-    TouchableOpacity,
-    Platform,
-    PermissionsAndroid,
     Alert 
   } from "react-native";
-import MapView, {
-    Marker,
-    AnimatedRegion,
+import MapView, { 
     Polyline,
-    PROVIDER_GOOGLE
   } from "react-native-maps";
 //import calculateCalories from './src/calories/CalculateCalories'
 import haversine from "haversine";
