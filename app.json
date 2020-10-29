@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "forgotPassword",
-    "slug": "forgotPassword",
+    "name": "frontendPages",
+    "slug": "frontendPages",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "image": "./assets/SplashScreen.png",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "updates": {
@@ -21,6 +21,9 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "android": {
+      "package": "com.runningguys"
     }
   }
 }
