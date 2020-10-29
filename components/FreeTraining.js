@@ -35,7 +35,7 @@ class FreeTraining extends Component {
         this._panResponder = {};
         this._previousHeight = menuShowHeight;
         this._menuStyles = {};
-        this.menu = (null : ?{ setNativeProps(props: Object): void });
+        // this.menu = (null : ?{ setNativeProps(props) });
         this.show = true;
     }
 
@@ -160,12 +160,12 @@ class FreeTraining extends Component {
         this.menu && this.menu.setNativeProps(this._menuStyles);
     }
 
-    _handleStartShouldSetPanResponder = (e: Object, gestureState: Object): boolean => {
+    _handleStartShouldSetPanResponder = (e, gestureState) => {
         // Should we become active when the user presses down on the menu?
         return true;
     }
 
-    _handleMoveShouldSetPanResponder = (e: Object, gestureState: Object): boolean => {
+    _handleMoveShouldSetPanResponder = (e, gestureState) => {
         // Only move more than 5 pixels to respond to move
         let { dx, dy } = gestureState;
         if ((Math.abs(dx) > 5) || (Math.abs(dy) > 5)) {
@@ -175,10 +175,10 @@ class FreeTraining extends Component {
         }
     }
 
-    _handlePanResponderGrant = (e: Object, gestureState: Object) => {
+    _handlePanResponderGrant = (e, gestureState) => {
         this._highlight();
     }
-    _handlePanResponderMove = (e: Object, gestureState: Object) => {
+    _handlePanResponderMove = (e, gestureState) => {
         if (this.show && gestureState.dy > 0 && gestureState.dy < (menuShowHeight - menuHideHeight)
             || !this.show && gestureState.dy < 0 && gestureState.dy > -(menuShowHeight - menuHideHeight)) {
             this._menuStyles.style.height = this._previousHeight - gestureState.dy;
@@ -186,7 +186,7 @@ class FreeTraining extends Component {
         }
 
     }
-    _handlePanResponderEnd = (e: Object, gestureState: Object) => {
+    _handlePanResponderEnd = (e, gestureState) => {
         this._unHighlight();
 
         if (gestureState.dy <= -50 && !this.show) {
@@ -207,8 +207,8 @@ class FreeTraining extends Component {
 
 const w = Dimensions.get('window').width;
 const h = Dimensions.get('window').height;
-const menuShowHeight = h * 0.25;
-const menuHideHeight = h * 0.1;
+const menuShowHeight = 220;
+const menuHideHeight = 85;
 
 var styles = StyleSheet.create({
     container: {
