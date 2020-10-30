@@ -3,15 +3,15 @@ import {
     StyleSheet,
     View,
     Text,
-    Alert 
+    Alert,
+    Button
   } from "react-native";
 import MapView, { 
     Polyline,
   } from "react-native-maps";
 //import calculateCalories from './src/calories/CalculateCalories'
 import haversine from "haversine";
-import StartButton from "./src/runbutton/StartButton"
-import StopRunButton from "./src/runbutton/StopRunButton"
+
 
 export class SimplyRun extends Component {
     state = {
@@ -58,7 +58,6 @@ export class SimplyRun extends Component {
     endRun = () => {
         this.setState({ stopButton: false })
         this.setState({ current: "" })
-        this.props.navigation.navigate('EndRun');
         var totalTimeSecs = (this.state.hour * 60 * 60) + (this.state.min * 60) + this.state.sec + (this.state.mili / 1000);
         if (this.state.distance !== 0) {
             var speed =  this.state.distance/(totalTimeSecs / 60) 
@@ -73,7 +72,10 @@ export class SimplyRun extends Component {
             'Confirm End Run',
             'Would you like to end your run?',
             [
-                { text: 'Yes', onPress: () => { this.endRun() } },
+                { 
+                    text: 'Yes', 
+                    onPress: () => { this.endRun() } 
+                },
                 {
                     text: 'No',
                     style: 'cancel'
@@ -84,6 +86,7 @@ export class SimplyRun extends Component {
     }
 
     start = () =>{
+
         var startTime = new Date().getTime()
         if(!this.state.startRun & this.state.paused){
             this.setState({ paused: false })
@@ -209,19 +212,19 @@ export class SimplyRun extends Component {
                     <Text style={{ fontSize: 15 }}> {this.state.current}</Text>
                     {
                         this.state.displayStat ? < Text style={{
-                            paddingBottom: 10, fontSize: 15
+                            paddingBottom: 30, fontSize: 15
                         }}> {this.state.stats}</Text> : null
                     }
                     <View style={styles.buttonContainer}>
                         {
-                            this.state.button ? < StartButton onPress={this.start} pauseButton={true} /> :
-                                < StartButton onPress={this.start} pauseButton={false} />
+                            this.state.button ? < Button onPress={this.start} pauseButton={true} title={"Pause"} /> :
+                                < Button onPress={this.start} pauseButton={false} title={"Start"} />
 
                         }
                         <Text>  </Text>
                         {
                             !this.state.button && this.state.stopButton ?
-                                <StopRunButton style={{ fontSize: 20 }} onLongPress={this.endRunButton} title={'STOP'} /> : null
+                                <Button style={{ fontSize: 20 }} onPress={this.endRunButton} title={"Stop"} /> : null
                         }
 
                     </View>
@@ -251,7 +254,7 @@ styles = StyleSheet.create({
       
       marginVertical: 30,
       backgroundColor: "transparent"
-    }
+    },
   });
 
 export default SimplyRun;
