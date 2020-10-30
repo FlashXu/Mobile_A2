@@ -1,0 +1,898 @@
+---
+swagger: "2.0"
+info:
+  description: "This is a description of the REST HTTP API for our app database."
+  version: "1.0.0"
+  title: "Running App"
+  license:
+    name: "GitHub"
+    url: "https://github.com/FlashXu/Mobile_A2"
+host: "www.mobileappproj.ml:5000"
+tags:
+- name: "accounts"
+  description: "Storing users' accounts."
+- name: "personal_info"
+  description: "Storing users' personal info."
+- name: "friends_list"
+  description: "Storing users' friends."
+- name: "online_info"
+  description: "Storing users' online info."
+- name: "running_record"
+  description: "Storing users' running record."
+- name: "moments"
+  description: "Storing users' moments."
+- name: "distance"
+  description: "Storing users' running distance."
+schemes:
+- "http"
+paths:
+  /accounts:
+    get:
+      tags:
+      - "accounts"
+      summary: "Get an existing account info."
+      operationId: "accounts_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "user id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such an account."
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    post:
+      tags:
+      - "accounts"
+      summary: "Add a new account to db."
+      operationId: "accounts_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Account info. includes users' user name and password."
+        required: true
+        schema:
+          $ref: "#/definitions/createAccount"
+      responses:
+        "200":
+          description: "Success."
+        "406":
+          description: "Account already existed."
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    put:
+      tags:
+      - "accounts"
+      summary: "Update an existing account."
+      operationId: "accounts_put"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Account new detailed info."
+        required: true
+        schema:
+          $ref: "#/definitions/updateAccount"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such an account."
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+    delete:
+      tags:
+      - "accounts"
+      summary: "Delete an existing account."
+      operationId: "accounts_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Only contain id or id list."
+        required: true
+        schema:
+          $ref: "#/definitions/deleteAccount"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+  /accounts/auth:
+    post:
+      tags:
+      - "accounts"
+      summary: "Auth an existing account info and obtain its id."
+      operationId: "accounts_auth_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Account info. includes users' user name and password."
+        required: true
+        schema:
+          $ref: "#/definitions/createAccount"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "Wrong user_name or password."
+      x-swagger-router-controller: "swagger_server.controllers.accounts_controller"
+  /personal_info:
+    get:
+      tags:
+      - "personal_info"
+      summary: "Get existing personal info."
+      operationId: "personal_info_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "user id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such info."
+      x-swagger-router-controller: "swagger_server.controllers.personal_info_controller"
+    post:
+      tags:
+      - "personal_info"
+      summary: "Add a new personal info to db."
+      operationId: "personal_info_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Personal info. includes _id (same with the one in accounts),\
+          \ name, gender, age, phone and email."
+        required: true
+        schema:
+          $ref: "#/definitions/createPersonal"
+      responses:
+        "200":
+          description: "Success."
+        "406":
+          description: "Personal info already existed."
+      x-swagger-router-controller: "swagger_server.controllers.personal_info_controller"
+    put:
+      tags:
+      - "personal_info"
+      summary: "Update existing personal info."
+      operationId: "personal_info_put"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "New personal info."
+        required: true
+        schema:
+          $ref: "#/definitions/createPersonal"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such info."
+      x-swagger-router-controller: "swagger_server.controllers.personal_info_controller"
+    delete:
+      tags:
+      - "personal_info"
+      summary: "Delete existing personal info."
+      operationId: "personal_info_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Only contain id or id list."
+        required: true
+        schema:
+          $ref: "#/definitions/deleteAccount"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.personal_info_controller"
+  /friends_list:
+    get:
+      tags:
+      - "friends_list"
+      summary: "Get existing friends info."
+      operationId: "friends_list_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "user id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such info."
+      x-swagger-router-controller: "swagger_server.controllers.friends_list_controller"
+    post:
+      tags:
+      - "friends_list"
+      summary: "Add the users' friends list to db."
+      operationId: "friends_list_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Friends list includes _id (same with the one in accounts) and\
+          \ friends"
+        required: true
+        schema:
+          $ref: "#/definitions/createFriends"
+      responses:
+        "200":
+          description: "Success."
+        "406":
+          description: "Friends info already existed."
+      x-swagger-router-controller: "swagger_server.controllers.friends_list_controller"
+    put:
+      tags:
+      - "friends_list"
+      summary: "Update existing friends info."
+      description: "For add/delete friends, please input the correct word ('add' or\
+        \ 'delete') in the field 'operation'. "
+      operationId: "friends_list_put"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "New friends info you want to update."
+        required: true
+        schema:
+          $ref: "#/definitions/updateFriends"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such info."
+      x-swagger-router-controller: "swagger_server.controllers.friends_list_controller"
+    delete:
+      tags:
+      - "friends_list"
+      summary: "Delete existing friends info."
+      operationId: "friends_list_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Only contain id or id list."
+        required: true
+        schema:
+          $ref: "#/definitions/deleteAccount"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.friends_list_controller"
+  /online_info:
+    put:
+      tags:
+      - "online_info"
+      summary: "Update/create online info."
+      operationId: "online_info_put"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Include '_id' and 'status'."
+        required: true
+        schema:
+          $ref: "#/definitions/updateOnline"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.online_info_controller"
+    delete:
+      tags:
+      - "online_info"
+      summary: "Delete existing online info."
+      operationId: "online_info_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Only contain id or id list."
+        required: true
+        schema:
+          $ref: "#/definitions/deleteAccount"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.online_info_controller"
+  /online_info/get_online_list:
+    post:
+      tags:
+      - "online_info"
+      summary: "Get the users' online info."
+      operationId: "online_info_get_online_list_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Include id list."
+        required: true
+        schema:
+          $ref: "#/definitions/getOnline"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such info."
+      x-swagger-router-controller: "swagger_server.controllers.online_info_controller"
+  /running_record:
+    get:
+      tags:
+      - "running_record"
+      summary: "Get an existing running record."
+      operationId: "running_record_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "record id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such a record."
+      x-swagger-router-controller: "swagger_server.controllers.running_record_controller"
+    post:
+      tags:
+      - "running_record"
+      summary: "Add a new running record to db."
+      operationId: "running_record_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Running record includes user_id, start_time, end_time, coordinate,\
+          \ distance."
+        required: true
+        schema:
+          $ref: "#/definitions/createRecord"
+      responses:
+        "200":
+          description: "Success."
+        "406":
+          description: "Account already existed."
+      x-swagger-router-controller: "swagger_server.controllers.running_record_controller"
+    delete:
+      tags:
+      - "running_record"
+      summary: "Delete an existing running record."
+      operationId: "running_record_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Only contain id or id list."
+        required: true
+        schema:
+          $ref: "#/definitions/deleteAccount"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.running_record_controller"
+  /running_record/query:
+    post:
+      tags:
+      - "running_record"
+      summary: "Query running records."
+      operationId: "running_record_query_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Queries only include query key with the format: \n[[_id1, start_time1],[_id2,\
+          \ start_time2]]."
+        required: true
+        schema:
+          $ref: "#/definitions/query"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no record complying with the query condition."
+      x-swagger-router-controller: "swagger_server.controllers.running_record_controller"
+    delete:
+      tags:
+      - "running_record"
+      summary: "Delete running records by query."
+      operationId: "running_record_query_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Same format as querying existing running records, only contain\
+          \ query_key."
+        required: true
+        schema:
+          $ref: "#/definitions/query"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no record complying with the query condition."
+      x-swagger-router-controller: "swagger_server.controllers.running_record_controller"
+  /moments:
+    get:
+      tags:
+      - "moments"
+      summary: "Get an existing moment."
+      operationId: "moments_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "user id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such an account."
+      x-swagger-router-controller: "swagger_server.controllers.moments_controller"
+    post:
+      tags:
+      - "moments"
+      summary: "Create a new moment to db."
+      operationId: "moments_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A moment includes user's user_id, time, comments and contents."
+        required: true
+        schema:
+          $ref: "#/definitions/createMoment"
+      responses:
+        "200":
+          description: "Success."
+        "406":
+          description: "Moment already existed."
+      x-swagger-router-controller: "swagger_server.controllers.moments_controller"
+    delete:
+      tags:
+      - "moments"
+      summary: "Delete an existing moment."
+      operationId: "moments_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Only contain id or id list."
+        required: true
+        schema:
+          $ref: "#/definitions/deleteAccount"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.moments_controller"
+  /moments/query:
+    post:
+      tags:
+      - "moments"
+      summary: "Query moments."
+      operationId: "moments_query_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Queries only include query key with the format: \n[[user_id1,\
+          \ time1],[user_id2, time2]]."
+        required: true
+        schema:
+          $ref: "#/definitions/query"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no record complying with the query condition."
+      x-swagger-router-controller: "swagger_server.controllers.moments_controller"
+    delete:
+      tags:
+      - "moments"
+      summary: "Delete moments by query."
+      operationId: "moments_query_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Same format as querying existing moments, only contain query_key."
+        required: true
+        schema:
+          $ref: "#/definitions/query"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no record complying with the query condition."
+      x-swagger-router-controller: "swagger_server.controllers.moments_controller"
+  /moments/comment:
+    post:
+      tags:
+      - "moments"
+      summary: "Comment to a moment."
+      operationId: "moments_comment_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "A comment includes _id (moment id), user_id(who comment it),\
+          \ time, contents."
+        required: true
+        schema:
+          $ref: "#/definitions/createComment"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such a moment."
+      x-swagger-router-controller: "swagger_server.controllers.moments_controller"
+  /distance:
+    get:
+      tags:
+      - "distance"
+      summary: "Get an existing distance record."
+      operationId: "distance_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "user id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such a record."
+      x-swagger-router-controller: "swagger_server.controllers.distance_controller"
+    post:
+      tags:
+      - "distance"
+      summary: "Add a new record of distance to db."
+      operationId: "distance_post"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Distance info. includes users' _id, start_time and distance"
+        required: true
+        schema:
+          $ref: "#/definitions/createDistance"
+      responses:
+        "200":
+          description: "Success."
+        "406":
+          description: "Account already existed."
+      x-swagger-router-controller: "swagger_server.controllers.distance_controller"
+    put:
+      tags:
+      - "distance"
+      summary: "Update an existing distance record."
+      operationId: "distance_put"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "New running record includes user's _id, start_time and distance."
+        required: true
+        schema:
+          $ref: "#/definitions/createDistance"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such an account."
+      x-swagger-router-controller: "swagger_server.controllers.distance_controller"
+    delete:
+      tags:
+      - "distance"
+      summary: "Delete an existing distance record."
+      operationId: "distance_delete"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Only contain id or id list."
+        required: true
+        schema:
+          $ref: "#/definitions/deleteAccount"
+      responses:
+        "200":
+          description: "Success."
+      x-swagger-router-controller: "swagger_server.controllers.distance_controller"
+  /distance/weekly_ranking:
+    get:
+      tags:
+      - "distance"
+      summary: "Get this week's distance ranking for a user."
+      operationId: "distance_weekly_ranking_get"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "id"
+        in: "query"
+        description: "user id"
+        required: true
+        type: "string"
+      responses:
+        "200":
+          description: "Success."
+        "404":
+          description: "There is no such a user."
+      x-swagger-router-controller: "swagger_server.controllers.distance_controller"
+definitions:
+  createAccount:
+    type: "object"
+    required:
+    - "pwd"
+    - "user_name"
+    properties:
+      user_name:
+        type: "string"
+        example: "Yichao_Xu@gmail.com"
+      pwd:
+        type: "string"
+        example: "123456"
+  deleteAccount:
+    type: "object"
+    required:
+    - "_id"
+    properties:
+      _id:
+        type: "string"
+        example: "123456"
+  updateAccount:
+    type: "object"
+    required:
+    - "_id"
+    - "pwd"
+    - "user_name"
+    properties:
+      _id:
+        type: "string"
+        example: "123456"
+      user_name:
+        type: "string"
+        example: "Yichao_Xu@gmail.com"
+      pwd:
+        type: "string"
+        example: "123456"
+  createPersonal:
+    type: "object"
+    required:
+    - "_id"
+    - "age"
+    - "email"
+    - "gender"
+    - "name"
+    - "phone"
+    properties:
+      _id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      name:
+        type: "string"
+        example: "Yichao Xu"
+      gender:
+        type: "string"
+        example: "male"
+      age:
+        type: "string"
+        example: "18"
+      phone:
+        type: "string"
+        example: "123456"
+      email:
+        type: "string"
+        example: "Yichao_Xu@gmail.com"
+  createFriends:
+    type: "object"
+    required:
+    - "_id"
+    - "friends"
+    properties:
+      _id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      friends:
+        type: "array"
+        example:
+        - "139cead802d001cef8a21b6c76078470"
+        - "139cead802d001cef8a21b6c76078471"
+        items:
+          type: "string"
+  updateFriends:
+    type: "object"
+    required:
+    - "_id"
+    - "friends"
+    - "operation"
+    properties:
+      _id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      operation:
+        type: "string"
+        example: "add"
+      friends:
+        type: "array"
+        example:
+        - "139cead802d001cef8a21b6c76078470"
+        - "139cead802d001cef8a21b6c76078471"
+        items:
+          type: "string"
+  updateOnline:
+    type: "object"
+    required:
+    - "_id"
+    - "status"
+    properties:
+      _id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      status:
+        type: "string"
+        example: "online"
+  getOnline:
+    type: "object"
+    required:
+    - "_id"
+    properties:
+      _id:
+        type: "array"
+        example:
+        - "139cead802d001cef8a21b6c76078470"
+        - "139cead802d001cef8a21b6c760799e8"
+        items:
+          type: "string"
+  createRecord:
+    type: "object"
+    required:
+    - "coordinate"
+    - "distance"
+    - "end_time"
+    - "start_time"
+    - "user_id"
+    properties:
+      user_id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      start_time:
+        type: "string"
+        example: "2020-09-20 15:36:00"
+      end_time:
+        type: "string"
+        example: "2020-09-20 16:36:00"
+      coordinate:
+        type: "array"
+        example:
+        - - 1
+          - 2
+        - - 3
+          - 4
+        items:
+          type: "array"
+          items:
+            type: "number"
+      distance:
+        type: "string"
+        example: "6"
+  query:
+    type: "object"
+    required:
+    - "query_key"
+    properties:
+      query_key:
+        type: "array"
+        example:
+        - - "139cead802d001cef8a21b6c76078470"
+          - "2020-09-01 15:36:00"
+        - - "139cead802d001cef8a21b6c76078470"
+          - "2020-09-31 15:36:00"
+        items:
+          type: "array"
+          items:
+            type: "string"
+  createMoment:
+    type: "object"
+    required:
+    - "comments"
+    - "contents"
+    - "time"
+    - "user_id"
+    properties:
+      user_id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      time:
+        type: "string"
+        example: "2020-09-25 15:36:00"
+      comments:
+        type: "array"
+        example: []
+        items:
+          type: "string"
+      contents:
+        type: "string"
+        example: "I hate covid-19!"
+  createComment:
+    type: "object"
+    required:
+    - "_id"
+    - "contents"
+    - "time"
+    - "user_id"
+    properties:
+      _id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c760bd269"
+      user_id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      time:
+        type: "string"
+        example: "2020-09-25 15:36:00"
+      contents:
+        type: "string"
+        example: "I hate covid-19 too!"
+  createDistance:
+    type: "object"
+    required:
+    - "_id"
+    - "distance"
+    - "start_time"
+    properties:
+      _id:
+        type: "string"
+        example: "139cead802d001cef8a21b6c76078470"
+      start_time:
+        type: "string"
+        example: "2020-09-25 15:36:00"
+      distance:
+        type: "number"
+        example: 5.0
