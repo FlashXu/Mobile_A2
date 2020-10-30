@@ -24,7 +24,7 @@
 * `FriendsBody.js` - Friends page.
 * `FrontPage.js` - App front page.
 * `LogIn.js` - Login page.
-* `MainMenuPage.js - Main menu page.
+* `MainMenuPage.js` - Main menu page.
 * `ProfileBody.js` - Profile page.
 * `RankingBody.js` - Ranking in friends page.
 * `ResetPassword.js` - Reset password page.
