@@ -25,7 +25,7 @@ class ShareBody extends Component {
         pageLoading:true,
 
         //Request User Info from server
-        userFirstName:'Minghui',
+        userName:'',
         userProfileImg: require('../assets/man-user.png'),
 
         //Request All Posts created by the friend of this user from server
@@ -114,6 +114,13 @@ class ShareBody extends Component {
     // 先获取用户id
     this.getID().then(function(id){
       if (id != null){
+        var url_personal_info = 'http://www.mobileappproj.ml:5000/personal_info?id=' + id;
+        getDBdata(url_personal_info).then(function(res){
+          if(res.resp == 200){
+            var user_name = res.list_info[0].first_name + ' ' + res.list_info[0].last_name;
+            pageObj.setState({userName: user_name});
+          }
+        });
         var url = 'http://www.mobileappproj.ml:5000/moments/friends_moments?id=' + id;
         getDBdata(url).then(function(res){
           // 更新state
@@ -171,48 +178,42 @@ class ShareBody extends Component {
   submitComment() {
     //append comment to array
     let postId = this.state.currentOverlayPostId;
-    let posts = this.state.trainingSessions;
-    let post = this.state.trainingSessions.filter( (e) => {return (e.postId===postId);} )[0];
-
+    let postIndex = this.state.currentPostIndex;
+ 
     //format today's date
     let date = new Date();
-    let formattedDate = Moment(date).format('DD/MM');
 
-    //content of comment
-    let newCommentContent = '';
-    
-    if (this.state.newCommentContent) {
-      //push comment into comments
-      let newComment = {
-        content:this.state.newCommentContent,
-        date:formattedDate,
-        name:this.state.userFirstName,
-        profileImg:this.state.userProfileImg
+    // 发送comment到服务器
+    var current_time = Moment(date).format('YYYY-MM-DD HH:mm:ss');
+    var pageObj = this;
+    var opDBdata = this.bodyOperation;
+    this.getID().then((id) => {
+      if(id != null){
+        var data = JSON.stringify({
+          "_id": postId,
+          "user_id": id,
+          "time":current_time,
+          "contents":pageObj.state.newCommentContent
+        });
+        var url = 'http://www.mobileappproj.ml:5000/moments/comment';
+        opDBdata(url, data, 'POST').then((res) => {
+          if(res == 404){
+            alert('There is no such a moment, please fresh again!');
+          }else{
+            alert('Having successfully sent the comment.');
+            // 更新state
+            var current_posts = pageObj.state.trainingSessions;
+            var user_comment = {};
+            user_comment.date = current_time;
+            user_comment.name = pageObj.state.userName;
+            user_comment.content = pageObj.state.newCommentContent;
+            user_comment.profileImg = require('../assets/man-user.png');
+            current_posts[postIndex].comments.push(user_comment);
+            pageObj.setState({trainingSessions: current_posts, showCommentEditor: false, newCommentContent: ''});
+          }
+        });
       }
-      post.comments.push(newComment);
-    }
-
-    for (let i in posts) {
-      if (posts[i].postId === postId) {
-        posts[i] = post;
-      }
-    }
-
-    // save comment into the list
-    this.setState({trainingSessions:posts}, ()=>{
-        
-        //this.state.trainingSessions Object is updated, send request to update server database
-        //-------------------------------Request----------------------------------
-
-
-
-
-
-        //-------------------------------Request----------------------------------
-
-        this.setState({newCommentContent:'',showCommentEditor:false});
-      }
-    )
+    }, opDBdata, postIndex, postId, current_time, pageObj);
   }
 
   //Function for each tab being pressed
@@ -292,7 +293,7 @@ class ShareBody extends Component {
                         if (postId) {
                           context.setState(()=>{return {showCommentEditor:!context.state.showCommentEditor}})
                         } else {
-                          context.setState({currentOverlayPostId:trainingSessions[i].postId,modalVisible:true});
+                          context.setState({currentOverlayPostId:trainingSessions[i].postId,modalVisible:true, currentPostIndex:i});
                         }
                       }}>
                       <MaterialCommunityIcons style={{flex:1}} name="comment-text-outline" size={30} color={context.state.showCommentEditor? 'rgba(74, 74, 74, 0.9)' :'black'} />
