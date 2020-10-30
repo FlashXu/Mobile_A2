@@ -2,6 +2,35 @@ from flask import Flask, request, Blueprint
 from couchdb import ResourceConflict, ResourceNotFound
 import db_op
 import forget_pwd
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+
+def send_welcome_email(receiver):
+    mail_username = 'runningguysservice@gmail.com'
+    mail_password = 'mobile09'
+    # HOST & PORT
+    HOST = 'smtp.gmail.com'
+    sender = mail_username
+    welcome_str = "Dear Customer,\n\n    Welcome to use our app! Hope you enjoy our running projects! :)"
+    message = MIMEText(welcome_str, 'plain', 'utf-8')
+    receiver = [receiver]
+    subject = 'Welcome To Use Our Running App'
+    message['Subject'] = Header(subject, 'utf-8')
+    try:
+        smtpObj = smtplib.SMTP_SSL(HOST)
+        smtpObj.ehlo(HOST)
+        smtpObj.login(mail_username, mail_password)
+    except:
+        print('CONNECT ERROR ****')
+        return 411
+    try:
+        smtpObj.sendmail(sender, receiver, message.as_string())
+        print("Success.")
+        return 200
+    except smtplib.SMTPException:
+        print("Error in sending email.")
+        return 412
 
 # Handle database
 def db_accounts(db_server, operation, id = '', data = {}):
@@ -12,7 +41,12 @@ def db_accounts(db_server, operation, id = '', data = {}):
         record_list = db.view('auth/auth', start_key = [user_name], end_key = [user_name + 'CHANGE'])
         if len(record_list) != 0:
             return 406, ''
-        resp, gen_id= db_op.db_operate(db_server, 'accounts', operation, data = data)
+        res = send_welcome_email(user_name)
+        if res == 200:
+            resp, gen_id= db_op.db_operate(db_server, 'accounts', operation, data = data)
+        else:
+            resp = res
+            gen_id = ''
         return resp, gen_id
 
     elif operation.lower() == 'get':
@@ -48,6 +82,18 @@ def db_accounts(db_server, operation, id = '', data = {}):
             return 404
         resp = db_op.db_operate(db_server, 'accounts', operation, id = id)
         return resp
+
+    elif operation.lower() == 'exist':
+        db = db_server['accounts']
+        user_name = data['user_name']
+        record_list = db.view('auth/auth', start_key=[user_name], end_key=[user_name + 'CHANGE'])
+        if len(record_list) != 0:
+            gen_id = ''
+            for row in record_list:
+                gen_id = row.value
+            return 200, gen_id
+        else:
+            return 404, ''
 
 # Flask for accounts.
 accounts_handler = Blueprint('accounts', __name__)
@@ -90,7 +136,7 @@ def resp_account_auth():
     return response
 
 # Handing forget password.
-@accounts_handler.route('/forget_pwd', methods=['GET', 'POST'])
+@accounts_handler.route('/forget_pwd', methods=['GET', 'POST', 'DELETE'])
 def resp_account_forgetpwd():
     response = {}
     if request.method == 'GET':
@@ -105,6 +151,24 @@ def resp_account_forgetpwd():
         resp, id = forget_pwd.verify_step2(db_server, user_name, verify_code)
         response['resp'] = resp
         response['gen_id'] = id
+        return response
+    elif request.method == 'DELETE':
+        id = request.args.get('id')
+        print(id)
+        resp = db_op.db_operate(db_server, 'verify', 'delete', id = id)
+        response['resp'] = resp
+        return response
+
+# Handing forget password.
+@accounts_handler.route('/exist', methods=['GET'])
+def resp_account_checkexist():
+    response = {}
+    if request.method == 'GET':
+        user_name = request.args.get('user_name')
+        data = {'user_name': user_name}
+        resp, gen_id = db_accounts(db_server, 'exist', data = data)
+        response['resp'] = resp
+        response['gen_id'] = gen_id
         return response
 
 

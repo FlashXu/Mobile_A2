@@ -26,7 +26,8 @@
 * `attachments.py` - Basic control and Flask response of the function attachments.
 * `forget_pwd.py` - Basic control and Flask response of the function forget password.
 * `python-flask-server-generated` - Swagger API server of the database.
-* `db_req_demo.js` - db demon with react native code.
+* `db_req_demo.js` - db demo with react native code.
+* `db_json_demo.js` - json file upload to/download from db demo with react native code.
 
 
 ## API file

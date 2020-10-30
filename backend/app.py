@@ -15,9 +15,9 @@ from gevent import monkey
 from gevent.pywsgi import WSGIServer
 from geventwebsocket.handler import WebSocketHandler
 
-monkey.patch_all()
+# monkey.patch_all()
 app = Flask(__name__)
-app.config.update(DEBUG=True)
+# app.config.update(DEBUG=True)
 CORS(app)
 
 db_server = db_op.get_server()
@@ -36,6 +36,6 @@ def welcome():
     return 'This is our app database, welcome!'
 
 if __name__ == '__main__':
-    # app.run(host='0.0.0.0', port = 5000, debug=True)
-    http_server = WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
-    http_server.serve_forever()
+    app.run(host='0.0.0.0', port = 5000, debug=True)
+    # http_server = WSGIServer(('0.0.0.0', 5000), app, handler_class=WebSocketHandler)
+    # http_server.serve_forever()

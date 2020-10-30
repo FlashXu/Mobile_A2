@@ -24,6 +24,8 @@ def db_friends_list(db_server, operation, id = '', data = {}):
             db.compact()
             db.save(new_content)
         except ResourceNotFound:
+            if 'operation' in data.keys():
+                del data['operation']
             db.save(data)
         except:
             return 404

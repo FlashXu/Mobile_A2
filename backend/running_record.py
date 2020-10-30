@@ -1,6 +1,7 @@
 from flask import Flask, request, Blueprint
 from couchdb import ResourceConflict, ResourceNotFound
 import db_op
+import distance
 
 def db_running_record(db_server, operation, id = '', query_key=[], data = {}):
     db = db_server['running_record']
@@ -13,7 +14,12 @@ def db_running_record(db_server, operation, id = '', query_key=[], data = {}):
         if len(record_list) != 0:
             print("Record is already existed!")
             return 406, ''
+        if type(data['distance']) == str:
+            data['distance'] = float(data['distance'])
         doc = db.save(data)
+        id = data['user_id']
+        data['_id'] = id
+        distance.db_distance(db_server, 'update', data = data)
         return 200, doc[0]
 
     # Query running record.

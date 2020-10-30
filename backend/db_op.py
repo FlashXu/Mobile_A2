@@ -38,9 +38,11 @@ def db_operate(db_server, db_name, operation, id = [], data = {}):
             try:
                 doc = dict(db[id[i]])
                 list_info.append(doc)
+                return 200, list_info
             except ResourceNotFound:
                 print('There is no such a file!')
-        return 200, list_info
+                return 404, []
+
 
     # Update existed file.
     elif operation.lower() == 'update':
