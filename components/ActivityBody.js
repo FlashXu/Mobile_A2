@@ -12,7 +12,7 @@ class ActivityBody extends Component {
   }
 
     toChooseRoute() {
-      this.navigation.navigate('ChooseRoute');
+      this.navigation.navigate('AssignTask');
     }
 
     toFreeTraining() {

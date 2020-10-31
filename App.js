@@ -20,7 +20,6 @@ import MainMenuPage from './components/MainMenuPage';
 import SignUp from './components/SignUp';
 import LogIn from './components/LogIn';
 import ResetPassword from './components/ResetPassword';
-import ChooseRoute from './components/ChooseRoute';
 import AssignTask from './components/AssignTask';
 import FreeTraining from './components/FreeTraining';
 
@@ -57,7 +56,6 @@ function App() {
         <Stack.Screen name="LogIn" component={LogIn} />
         <Stack.Screen name="ResetPassword" component={ResetPassword} />
 
-        <Stack.Screen name="ChooseRoute" component={ChooseRoute} />
         <Stack.Screen name="AssignTask" component={AssignTask} />
         <Stack.Screen name="FreeTraining" component={FreeTraining} />
       
