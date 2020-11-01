@@ -207,7 +207,7 @@ class AssignTask extends Component {
                 <View style={{
                     marginTop: h * 0.07,
                     marginHorizontal: w * 0.05,
-                    position: 'absolute',
+                    position: this.state.displayStart!='none'?'absolute':'relative',
                     display: this.state.displayStart
                 }}>
                     <Svg onPress={this.backButton.bind(this)} width={21.213} height={21.213} viewBox="0 0 21.213 21.213" {...props}>
@@ -228,10 +228,10 @@ class AssignTask extends Component {
 
                 <TouchableOpacity onPress={this.backButton.bind(this)}
                     style={{
-                        marginTop: h * 0.07,
-                        marginHorizontal: w * 0.05,
-                        position: 'absolute',
                         display: this.state.displayDetail,
+                        marginTop: h * 0.05,
+                        marginHorizontal: w * 0.03,
+                        position: this.state.displayDetail!='none'?'absolute':'relative',
                         flexDirection: 'row',
                         alignItems: 'center',
                     }}>
@@ -405,7 +405,7 @@ class AssignTask extends Component {
 const w = Dimensions.get('window').width;
 const h = Dimensions.get('window').height;
 // const menuShowHeight = h * 0.35;
-const menuHideHeight = h * 0.08;
+const menuHideHeight = 80;
 // const buttonHeight = h * 0.05;
 // const routeButtonWidth = w * (1-0.15) / 2;
 // const menuHideHeight = 30;

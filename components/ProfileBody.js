@@ -338,8 +338,7 @@ class ProfileBody extends Component {
         <View style={styles.body}>
             
             {/* <Text style = {{position:'absolute',color:'white',fontFamily: 'Poppins_300Light',top:5,right:40}}>Logout</Text> */}
-            <Ionicons onPress={() => this.logOut()} style={{position:'absolute',right:10}} name="md-exit" size={30} color="white" />
-            
+            <Ionicons onPress={() => this.logOut()} style={{left:'40%'}} name="md-exit" size={30} color="white" />
             <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:10}}>
                 <Image source={this.state.profile_img} style={styles.profileImage} />
                 <Text style = {styles.title}>{this.state.first_name}</Text>

@@ -1,5 +1,5 @@
 'use strict';
-import React, { Component,useState } from 'react';
+import React, { Component, useState } from 'react';
 import Svg, { G, Circle, Rect, Path } from 'react-native-svg';
 import { DangerZone } from 'expo';
 import {
@@ -10,6 +10,7 @@ import {
     Image,
     TouchableOpacity,
     Text,
+    ActivityIndicator
 } from 'react-native';
 import MapView, { 
     Polyline,
@@ -48,7 +49,8 @@ class FreeTraining extends Component {
             startRun: true,
             paused: false,
             button: false,
-            currentPosition : 0
+            currentPosition : 0,
+            loading: false,
         };
         this._panResponder = {};
         this._previousHeight = menuShowHeight;
@@ -81,7 +83,7 @@ class FreeTraining extends Component {
 
     startButton() {
         //按键反馈
-        this.setState({ startPressed: true });
+        this.setState({ loading: true });
         var startTime = new Date().getTime()
         if(!this.state.startRun & this.state.paused){
             this.setState({ paused: false })
@@ -91,7 +93,7 @@ class FreeTraining extends Component {
             this.setState({ startTime: new Date() })
 
             this.setState({ test: "Tracking Run1" })
-            this.setState({ button: true,  startRun: false })
+            this.setState({ button: true,  startRun: false, loading:false })
             this.startTracking()
             setTimeout(() => this.intervalID = setInterval(() => {
                 var diff = startTime - new Date().getTime();
@@ -144,13 +146,13 @@ class FreeTraining extends Component {
                         newMin = newMin - 60;
                         newHour = newHour + 1;
                     }
-                    this.setState({ hour: newHour, min: newMin, sec: newSec, mili: parseInt(mili) });
+                    this.setState({ hour: newHour, min: newMin, sec: newSec, mili: parseInt(mili)});
                     this.formatStats()
                 }, 500), 500 / 60);
 
             }else{
                 this.setState({ test: "Run Paused" })
-                this.setState({ button: false })
+                this.setState({ button: false, loading:false })
                 this.setState({ paused: true })
                 clearInterval(this.intervalID);
                 clearInterval(this.intervalTrackingID)
@@ -186,7 +188,7 @@ class FreeTraining extends Component {
                 this.setState({ Calories: cal })
             }
 
-        }, 5000), 1000);
+        }, 500), 300);
     }
     coordDistance = (position) => {
         return haversine(this.state.previousPosition, position, { unit: 'mile' }) || 0;
@@ -300,12 +302,17 @@ class FreeTraining extends Component {
                         <View style={{ alignItems: "center" }}>
                                 {
                                 this.state.button ? 
-                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={this.state.startPressed ? styles.StartButtonPress : styles.StartButton} >
+                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
                                          <Text style={ styles.text2}> Pause </Text>
                                     </TouchableOpacity>                                    
                                     :           
-                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={this.state.startPressed ? styles.StartButtonPress : styles.StartButton} >
-                                        <Text style={ styles.text2}> Start </Text>
+                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
+                                        <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Start </Text>
+                                        <ActivityIndicator 
+                                            style={this.state.loading ?  styles.text2 : {display:'none'}}
+                                            size="large" 
+                                            color="white" 
+                                        />
                                     </TouchableOpacity>              
                                 }
                             </View>
@@ -429,7 +436,7 @@ var styles = StyleSheet.create({
     },
     text3: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 15,
         fontFamily: 'Poppins_700Bold',
         marginTop: h * 0.01,
         // marginLeft: h * 0.02,
@@ -448,6 +455,7 @@ var styles = StyleSheet.create({
         borderRadius: 30,
         height: buttonHeight,
         width: w * 0.9,
+        marginTop: 10,
     },
 
     StartButtonPress: {
