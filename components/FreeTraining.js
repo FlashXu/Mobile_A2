@@ -20,6 +20,10 @@ import Food1 from '../assets/Food1.png';
 import Food2 from '../assets/Food2.png';
 import Food3 from '../assets/Food3.png';
 import Food4 from '../assets/Food4.png';
+import water from '../assets/water.png';
+import salad from '../assets/salad.png';
+import mushroom from '../assets/mushroom.png';
+import strawberry from '../assets/strawberry.png';
 import calculateCalories from '../components/CalculateCalories'
 import haversine from "haversine";
 
@@ -233,13 +237,13 @@ class FreeTraining extends Component {
         var CurrentSpeed = this.state.currSpeed.toFixed(1);
         var Calories = this.state.Calories.toFixed(1);
 
-        var FoodImage = Food1;
-        if (Calories > 200)
-            FoodImage = Food2;
-        if (Calories > 500)
-            FoodImage = Food3;
-        if (Calories > 1000)
-            FoodImage = Food4;
+        var FoodImage = water;
+        if (Calories > 4)
+            FoodImage = salad;
+        if (Calories > 15)
+            FoodImage = mushroom;
+        if (Calories > 53)
+            FoodImage = strawberry;
 
 //
         return (
