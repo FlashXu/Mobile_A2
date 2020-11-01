@@ -1,5 +1,5 @@
 'use strict';
-import React, { Component } from 'react';
+import React, { Component,useState } from 'react';
 import Svg, { G, Circle, Rect, Path } from 'react-native-svg';
 import { DangerZone } from 'expo';
 import {
@@ -7,48 +7,196 @@ import {
     PanResponder,
     StyleSheet,
     View,
-    Button,
     Image,
-    TouchableWithoutFeedback,
     TouchableOpacity,
     Text,
 } from 'react-native';
-import { RadioButtons } from 'react-native-radio-buttons';
-import { interpolate, multiply } from 'react-native-reanimated';
+import MapView, { 
+    Polyline,
+  } from "react-native-maps";
+
 import Food1 from '../assets/Food1.png';
 import Food2 from '../assets/Food2.png';
 import Food3 from '../assets/Food3.png';
 import Food4 from '../assets/Food4.png';
+import calculateCalories from '../components/CalculateCalories'
+import haversine from "haversine";
+
+const LATITUDE_DELTA = 0.009;
+const LONGITUDE_DELTA = 0.009;
 
 class FreeTraining extends Component {
+    
     constructor(props) {
         super(props);
         this.navigation = props.navigation;
         this.data = props.route.params;
         this.state = {
-            distance: 4,
+            distance: 0,
             time: '00:00:00',
-            AvgSpeed: 2.0,
-            CurrentSpeed: 1.0,
-            Calories: 600,
+            CurrentSpeed: 0.0,
+            Calories: 0,
+            coordinates: [],
+            secs: 0,
+            mins: 0,
+            hrs: 0,
+            startTime: "00:00:00",
+            route: "",
+            speed: 0,
+            currSpeed: 0,
+            test:"no text",
+            startRun: true,
+            paused: false,
+            button: false,
+            currentPosition : 0
         };
         this._panResponder = {};
         this._previousHeight = menuShowHeight;
         this._menuStyles = {};
         // this.menu = (null : ?{ setNativeProps(props) });
         this.show = true;
+        
     }
+    formatStats = () => {
+        var formatSec = "" + this.state.sec;
+        formatSec = formatSec.padStart(2, '0');
+        var formatMin = "" + this.state.min; 
+        formatMin = formatMin.padStart(2, '0')
+
+        var formatHour = "" + this.state.hour; 
+        formatHour = formatHour.padStart(2, '0')
+        var totalTimeSecs = (this.state.hour * 60 * 60) + (this.state.min * 60) + this.state.sec + (this.state.mili / 1000);
+        if (totalTimeSecs !== 0) {
+            var speed =  this.state.distance*1600/totalTimeSecs
+            this.setState({ speed: speed })
+
+        }
+        this.setState({
+            time:  formatHour + ":" + formatMin + ":" + formatSec,
+        })
+        this.setState({ test: "format" })
+
+    }
+
 
     startButton() {
         //按键反馈
         this.setState({ startPressed: true });
-    }
+        var startTime = new Date().getTime()
+        if(!this.state.startRun & this.state.paused){
+            this.setState({ paused: false })
+        }
+        //startRun 表示最开始的准备工作
+        if (this.state.startRun) {
+            this.setState({ startTime: new Date() })
 
+            this.setState({ test: "Tracking Run1" })
+            this.setState({ button: true,  startRun: false })
+            this.startTracking()
+            setTimeout(() => this.intervalID = setInterval(() => {
+                var diff = startTime - new Date().getTime();
+                var hr = Math.floor(-diff / 3600000)
+                var mili = -diff - 3600000 * hr
+                var min = Math.floor(mili / 60000);
+                mili = mili - 60000 * min;
+                var sec = mili / 1000;
+                mili = mili - 1000 & sec;
+                min = min.toFixed(0);
+                sec = sec.toFixed(0);
+                this.setState({ hour: parseInt(hr), min: parseInt(min), sec: parseInt(sec), mili: parseInt(mili) })
+                this.formatStats()
+            }, 500), 1000 / 60);        
+        }else{
+            if (this.state.paused) {
+                this.setState({ test: "Tracking Run2" })
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        var currentPosition = position.coords;
+                        this.setState({ previousPosition: currentPosition })
+                    }
+                )
+                this.startTracking()
+                var pauseSec = this.state.sec;
+                var pauseMin = this.state.min;
+                var pauseHour = this.state.hour;
+                setTimeout(() => this.intervalID = setInterval(() => {
+                    this.setState({ button: true })
+                    var diff = startTime - new Date().getTime();
+                    var hr = Math.floor(-diff / 3600000)
+                    var mili = -diff - 3600000 * hr
+                    var min = Math.floor(mili / 60000);
+                    mili = mili - 60000 * min;
+                    var sec = mili / 1000;
+                    mili = mili - 1000 & sec;
+                    min = min.toFixed(0);
+                    sec = sec.toFixed(0);
+                    //Add new time differnce to old time differnce 
+
+                    var newSec = pauseSec + parseInt(sec)
+                    var newMin = pauseMin + parseInt(min)
+                    var newHour = pauseHour + parseInt(hr)
+
+                    while (newSec >= 60) {
+                        newSec = newSec - 60;
+                        newMin = newMin + 1;
+                    }
+                    while (newMin >= 60) {
+                        newMin = newMin - 60;
+                        newHour = newHour + 1;
+                    }
+                    this.setState({ hour: newHour, min: newMin, sec: newSec, mili: parseInt(mili) });
+                    this.formatStats()
+                }, 500), 500 / 60);
+
+            }else{
+                this.setState({ test: "Run Paused" })
+                this.setState({ button: false })
+                this.setState({ paused: true })
+                clearInterval(this.intervalID);
+                clearInterval(this.intervalTrackingID)
+            }            
+        }
+    }
+    startTracking = () => {
+        setTimeout(() => this.intervalTrackingID = setInterval(() => {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    var currentPosition = position.coords;
+                    this.state.currentPosition = currentPosition
+                    this.setState({ coordinates: this.state.coordinates.concat([currentPosition]) })
+
+                    this.setState({ distance: this.state.distance + (this.coordDistance(currentPosition))* 1.609 })
+                    this.setState({test:this.coordDistance(currentPosition)})
+                    this.setState({ previousPosition: currentPosition })
+                    //geopoint = new firebase.firestore.GeoPoint(currentPosition.latitude, currentPosition.longitude)
+                    this.setState(prevState => ({
+                        route: [...prevState.route]
+                    }))
+                    this.setState({ test: "is tracking" })
+                    this.setState({ currSpeed:  position.coords.speed })
+                }
+
+            )
+
+            if (this.state.distance !== 0) {
+                var totalTimeSecs = (this.state.hour * 60 * 60) + (this.state.min * 60) + this.state.sec + (this.state.mili / 1000);
+                let kmPerHour = ((this.state.distance * 1.609)) / ((totalTimeSecs / 60) / 60)
+                //这里将体重默认设置为60
+                let cal = calculateCalories(( 60 * .435), kmPerHour, (totalTimeSecs / 60))
+                this.setState({ Calories: cal })
+            }
+
+        }, 5000), 1000);
+    }
+    coordDistance = (position) => {
+        return haversine(this.state.previousPosition, position, { unit: 'mile' }) || 0;
+    }
     backButton() {
         this.navigation.goBack();
     }
 
     componentWillMount() {
+        clearInterval(this.intervalId, this.intervalTrackingID);
         this._panResponder = PanResponder.create({
             onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
             onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -68,14 +216,20 @@ class FreeTraining extends Component {
     componentDidMount() {
         this._updateNativeStyles();
     }
+    getMapRegion = () => ({
+        latitude: this.state.currentPosition.latitude,
+        longitude: this.state.currentPosition.longitude,
+        latitudeDelta: LATITUDE_DELTA,
+        longitudeDelta: LONGITUDE_DELTA
+      });
 
     render = (props) => {
-
-        var distance = this.state.distance;
+ 
+        var distance = this.state.distance.toFixed(2);
         var time = this.state.time;
-        var AvgSpeed = this.state.AvgSpeed;
-        var CurrentSpeed = this.state.CurrentSpeed;
-        var Calories = this.state.Calories;
+        var AvgSpeed = this.state.speed.toFixed(1);
+        var CurrentSpeed = this.state.currSpeed.toFixed(1);
+        var Calories = this.state.Calories.toFixed(1);
 
         var FoodImage = Food1;
         if (Calories > 200)
@@ -85,14 +239,19 @@ class FreeTraining extends Component {
         if (Calories > 1000)
             FoodImage = Food4;
 
+//
         return (
             <View style={{ flex: 1, backgroundColor: 'pink' }} >
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
+                <Text style={{ color: 'blue' }}>{this.state.test}</Text>
+                <MapView
+                    style={styles.map}
+                    showsUserLocation={true}
+                    style={{ flex: 2 }}
+                    followsUserLocation={true}
+                    //region={this.getMapRegion()}
+                >
+                <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
+                </MapView>
 
                 <Svg onPress={this.backButton.bind(this)} style={styles.backButton} width={21.213} height={21.213} viewBox="0 0 21.213 21.213" {...props}>
                     <G data-name="Group 2420" fill="#000000">
@@ -139,6 +298,18 @@ class FreeTraining extends Component {
                                 <Text style={styles.text3}>Calories: {Calories} kj</Text>
                             </View>
                         </View>
+                        <View style={{ alignItems: "center" }}>
+                                {
+                                this.state.button ? 
+                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={this.state.startPressed ? styles.StartButtonPress : styles.StartButton} >
+                                         <Text style={ styles.text2}> Pause </Text>
+                                    </TouchableOpacity>                                    
+                                    :           
+                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={this.state.startPressed ? styles.StartButtonPress : styles.StartButton} >
+                                        <Text style={ styles.text2}> Start </Text>
+                                    </TouchableOpacity>              
+                                }
+                            </View>
                     </View>
                 </View>
             </View>
@@ -207,9 +378,10 @@ class FreeTraining extends Component {
 
 const w = Dimensions.get('window').width;
 const h = Dimensions.get('window').height;
-const menuShowHeight = 220;
+const menuShowHeight = 280;
 const menuHideHeight = 85;
-
+const buttonHeight = 45;
+//
 var styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -270,6 +442,27 @@ var styles = StyleSheet.create({
         //position: 'absolute',
         marginLeft: h * 0.03,
 
+    },
+    StartButton: {
+        backgroundColor: '#474BD9',
+        justifyContent: 'center',
+        borderRadius: 30,
+        height: buttonHeight,
+        width: w * 0.9,
+    },
+
+    StartButtonPress: {
+        backgroundColor: '#595ef0',
+        justifyContent: 'center',
+        borderRadius: 15,
+        height: buttonHeight,
+        width: w * 0.9,
+    },
+    text2: {
+        color: '#fff',
+        fontSize: 20,
+        fontFamily: 'Poppins_700Bold',
+        textAlign: 'center',
     },
 });
 
