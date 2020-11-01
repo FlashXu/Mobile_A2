@@ -242,7 +242,6 @@ class FreeTraining extends Component {
 //
         return (
             <View style={{ flex: 1, backgroundColor: 'pink' }} >
-                <Text style={{ color: 'blue' }}>{this.state.test}</Text>
                 <MapView
                     style={styles.map}
                     showsUserLocation={true}
