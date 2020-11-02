@@ -1,5 +1,5 @@
 import React, { Component }  from 'react';
-import { Dimensions, AsyncStorage } from 'react-native';
+import { Dimensions, AsyncStorage} from 'react-native';
 import { Image, Modal, StyleSheet, Alert, Text, View,ActivityIndicator, TouchableOpacity } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -255,11 +255,23 @@ class ProfileBody extends Component {
 
     async removeProfile(){
       try {
+           // Update online info.
+           var url = 'http://www.mobileappproj.ml:5000/online_info';
+           var opDBdata = this.bodyOperation;
+           await this.getID().then((id) => {
+             if(id!=null){
+               var data = JSON.stringify({
+                 "_id": id,
+                 "status": 'offline'
+               });
+               opDBdata(url, data, 'PUT');
+             }
+           }, url, opDBdata);
           // 删除所有信息
           await AsyncStorage.removeItem('@accountID');
           await AsyncStorage.removeItem('@profile');
           await AsyncStorage.removeItem('@running_record');
-          await AsyncStorage.removeItem('@running_distance');
+          await AsyncStorage.removeItem('@running_distance');  
       }catch (e) {
           console.error(e);
       }

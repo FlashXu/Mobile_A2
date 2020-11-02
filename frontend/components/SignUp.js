@@ -130,9 +130,9 @@ class SignUp extends Component {
   }
 
   render= (props) => {
-    var user_first_name = this.data.hasOwnProperty('first_name')? this.data.first_name : '';
-    var user_last_name = this.data.hasOwnProperty('last_name')? this.data.last_name : '';
-    var user_email = this.data.hasOwnProperty('email')? this.data.email : '';
+    var user_first_name = this.data.hasOwnProperty('first_name')? this.data.first_name : 'First Name';
+    var user_last_name = this.data.hasOwnProperty('last_name')? this.data.last_name : 'Last Name';
+    var user_email = this.data.hasOwnProperty('email')? this.data.email : 'Email';
 
     return (
       <ScrollView style={{flex: 1, backgroundColor: '#2A2E43'}}>

@@ -91,7 +91,7 @@ class LogIn extends Component {
     }
     // transfer to sign up page
     toSignUp() {
-        this.navigation.navigate('SignUp');
+        this.navigation.navigate('SignUp', {});
     }
 
     render = (element, props) => {
