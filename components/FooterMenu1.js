@@ -1,5 +1,5 @@
 import React, { Component }  from 'react';
-import { Dimensions, AppState, AsyncStorage} from 'react-native';
+import { Dimensions } from 'react-native';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Entypo, FontAwesome5, Feather, Ionicons } from '@expo/vector-icons';
 import { Poppins_300Light } from '@expo-google-fonts/poppins';
@@ -11,20 +11,9 @@ class FooterMenu extends Component {
       this.option = props.option;
       this.flex = props.yPosition;
       this.handler = props.handler;
-      // Update online info.
-      var url = 'http://www.mobileappproj.ml:5000/online_info';
-      var opDBdata = this.bodyOperation;
-      this.getID().then((id) => {
-        if(id!=null){
-          var data = JSON.stringify({
-            "_id": id,
-            "status": 'online'
-          });
-          opDBdata(url, data, 'PUT');
-        }
-      }, url, opDBdata);
+
       //Page default option is profile as Tab1
-      this.state = { tab1Pressed:true, tab2Pressed:false, tab3Pressed:false, tab4Pressed:false, appState: AppState.currentState}; 
+      this.state = { tab1Pressed:true, tab2Pressed:false, tab3Pressed:false, tab4Pressed:false }; 
   }
     // Switch Options
     switch(newOption) {
@@ -43,68 +32,7 @@ class FooterMenu extends Component {
         }
     }
 
-    // Request with params. (POST, DELETE and PUT)
-    async bodyOperation(url, data, operation){
-      const results = await fetch(url,{
-      method: operation,
-      body: data
-      })
-      .then((response) => response.json())
-      .catch((error) => {
-          console.error(error);
-          alert(error);
-      });
-      return results;
-    }
 
-    async getID(){
-      try {
-          id = await AsyncStorage.getItem('@accountID');
-          return id;
-      }catch (e) {
-          console.error(e);
-          return null;
-      }
-    }
-
-    componentDidMount() {
-      AppState.addEventListener('change', this._handleAppStateChange);
-    }
-  
-    componentWillUnmount() {
-      AppState.removeEventListener('change', this._handleAppStateChange);
-    }
-  
-    _handleAppStateChange = (nextAppState) => {
-      var url = 'http://www.mobileappproj.ml:5000/online_info';
-      var opDBdata = this.bodyOperation;
-
-      if (this.state.appState.match(/inactive|background/) && nextAppState === 'active') {
-        // alert('App has come to the foreground!')
-        this.getID().then((id) => {
-          if(id!=null){
-            var data = JSON.stringify({
-              "_id": id,
-              "status": 'online'
-            });
-            opDBdata(url, data, 'PUT');
-          }
-        }, url, opDBdata);
-        
-      }else if(this.state.appState === 'active' && nextAppState.match(/inactive|background/)){
-        // alert('App has come to the background!')
-        this.getID().then((id) => {
-          if(id!=null){
-            var data = JSON.stringify({
-              "_id": id,
-              "status": 'offline'
-            });
-            opDBdata(url, data, 'PUT');
-          }
-        }, url, opDBdata);
-      }
-      this.setState({appState: nextAppState});
-    }
 
     render= (props) => {
       return (

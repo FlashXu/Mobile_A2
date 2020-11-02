@@ -1,5 +1,5 @@
 import React, { Component }  from 'react';
-import { Dimensions, AsyncStorage} from 'react-native';
+import { Dimensions, AsyncStorage } from 'react-native';
 import { Image, Modal, StyleSheet, Alert, Text, View,ActivityIndicator, TouchableOpacity } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
@@ -102,8 +102,6 @@ class ProfileBody extends Component {
               }else{
                 var record_list = res.record_detail;
                 if(record_list.length > 0){
-                  // Set ave speed to be the latest ave. speed.
-                  pageObj.setState({avgSpeed: record_list[0].ave_speed});
                   var record = JSON.stringify(record_list);
                   storeinfo('@running_record', record);
                   var user_running_records = [];
@@ -255,23 +253,11 @@ class ProfileBody extends Component {
 
     async removeProfile(){
       try {
-           // Update online info.
-           var url = 'http://www.mobileappproj.ml:5000/online_info';
-           var opDBdata = this.bodyOperation;
-           await this.getID().then((id) => {
-             if(id!=null){
-               var data = JSON.stringify({
-                 "_id": id,
-                 "status": 'offline'
-               });
-               opDBdata(url, data, 'PUT');
-             }
-           }, url, opDBdata);
           // 删除所有信息
           await AsyncStorage.removeItem('@accountID');
           await AsyncStorage.removeItem('@profile');
           await AsyncStorage.removeItem('@running_record');
-          await AsyncStorage.removeItem('@running_distance');  
+          await AsyncStorage.removeItem('@running_distance');
       }catch (e) {
           console.error(e);
       }
@@ -352,8 +338,7 @@ class ProfileBody extends Component {
         <View style={styles.body}>
             
             {/* <Text style = {{position:'absolute',color:'white',fontFamily: 'Poppins_300Light',top:5,right:40}}>Logout</Text> */}
-            <Ionicons onPress={() => this.logOut()} style={{left:'43%'}} name="md-exit" size={35} color="white" />
-            
+            <Ionicons onPress={() => this.logOut()} style={{left:'40%'}} name="md-exit" size={30} color="white" />
             <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingHorizontal:10}}>
                 <Image source={this.state.profile_img} style={styles.profileImage} />
                 <Text style = {styles.title}>{this.state.first_name}</Text>

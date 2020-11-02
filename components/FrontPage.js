@@ -27,10 +27,7 @@ const FrontPage = ({ navigation, route , props }) => {
             console.error(e);
             return null;
         }
-        }
-
-
-
+    }
 
     
     function signUp() {
@@ -39,7 +36,7 @@ const FrontPage = ({ navigation, route , props }) => {
         setTimeout(()=>{ set1Pressed(false) }, 500);
 
         //navigate to sign up page
-        navigation.navigate('SignUp');
+        navigation.navigate('SignUp', {});
     }
 
     function testMainMenu() {

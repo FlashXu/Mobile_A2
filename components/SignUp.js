@@ -156,14 +156,14 @@ class SignUp extends Component {
         <Text style={styles.bigTitle}>Create Account</Text>
         <TextInput
           style={styles.textInput}
-          placeholder= {user_first_name} 
+          placeholder= 'First Name'
           placeholderTextColor='#FFF'
           onChangeText={text => this.setState({firstname:text})}
         />
 
         <TextInput
           style={styles.textInput}
-          placeholder= {user_last_name}
+          placeholder= 'Last Name'
           placeholderTextColor='#FFF'
           onChangeText={text => this.setState({lastname:text})}
         />
@@ -184,7 +184,7 @@ class SignUp extends Component {
 
         <TextInput
           style={styles.textInput}
-          placeholder= {user_email}
+          placeholder= 'Email'
           placeholderTextColor='#FFF'
           autoCompleteType='email'
           // onChangeText={text => onChangeText(text)}
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
     height: 48,
     marginTop: 20,
     paddingHorizontal: 40,
-    paddingVertical:20,
+    // paddingVertical:20,
   },
   buttonPress: {
     backgroundColor: '#595ef0',
@@ -317,7 +317,6 @@ const styles = StyleSheet.create({
     height: 48,
     marginTop: 20,
     paddingHorizontal: 40,
-    paddingVertical:20,
   },
     // button text
     buttonText: {
