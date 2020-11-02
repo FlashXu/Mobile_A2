@@ -110,7 +110,7 @@ update_friends_info(){
         user_info.Id = current_info._id;
         user_info.totalDistance = current_info.total_distance;
         user_info.sessionsComplete = current_info.completed_sessions;
-        user_info.avgSpeed = 0;
+        user_info.avgSpeed = current_info.ave_speed;
         user_info.name = current_info.first_name + ' ' + current_info.last_name;
         user_info.status = current_info.status;
         current_friends.push(user_info)

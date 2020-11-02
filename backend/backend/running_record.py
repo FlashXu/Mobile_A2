@@ -27,11 +27,14 @@ def db_running_record(db_server, operation, id = '', query_key=[], data = {}):
         record_list = db.view('running_info/running_info', start_key=query_key[0], end_key=query_key[1])
         if len(record_list) == 0:
             return 404, []
+        import datetime
         record_detail = []
         for row in record_list:
             doc = db[row.value]
             record_detail.append(dict(doc))
-        return 200, record_detail
+        sorted_records = sorted(record_detail, key=lambda kv: datetime.datetime.strptime(kv['start_time'], "%Y-%m-%d %H:%M:%S"),
+                                reverse=True)
+        return 200, sorted_records
 
     # Get running record by id.
     elif operation.lower() == 'get_by_id':

@@ -102,6 +102,8 @@ class ProfileBody extends Component {
               }else{
                 var record_list = res.record_detail;
                 if(record_list.length > 0){
+                  // Set ave speed to be the latest ave. speed.
+                  pageObj.setState({avgSpeed: record_list[0].ave_speed});
                   var record = JSON.stringify(record_list);
                   storeinfo('@running_record', record);
                   var user_running_records = [];

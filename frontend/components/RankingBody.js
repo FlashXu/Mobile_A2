@@ -111,7 +111,7 @@ showToday() {
                     var user_info = rank[i][1];
                     info_dict.Id = user_id;
                     info_dict.totalDistance = user_info.distance;
-                    info_dict.avgSpeed = 0;
+                    info_dict.avgSpeed = user_info.ave_speed;
                     info_dict.name = user_info.first_name + ' ' + user_info.last_name;
                     info_dict.rank = (i + 1).toString();
                     rank_info.push(info_dict); 
@@ -161,7 +161,7 @@ showWeek() {
                     var user_info = rank[i][1];
                     info_dict.Id = user_id;
                     info_dict.totalDistance = user_info.distance;
-                    info_dict.avgSpeed = 0;
+                    info_dict.avgSpeed = user_info.ave_speed;
                     info_dict.name = user_info.first_name + ' ' + user_info.last_name;
                     info_dict.rank = (i + 1).toString();
                     rank_info.push(info_dict); 
@@ -206,7 +206,7 @@ showMonth() {
                     var user_info = rank[i][1];
                     info_dict.Id = user_id;
                     info_dict.totalDistance = user_info.distance;
-                    info_dict.avgSpeed = 0;
+                    info_dict.avgSpeed = user_info.ave_speed;
                     info_dict.name = user_info.first_name + ' ' + user_info.last_name;
                     info_dict.rank = (i + 1).toString();
                     rank_info.push(info_dict); 
