@@ -13,13 +13,16 @@ export default class LocationData extends React.Component {
         this.state = {
             LocationsGet: null,
             data: null,
+            x: null,
+            y: null,
+            z: null,
         };
     };
     //For accelerometer
 
     _toggle = () => { 
       if (this._subscription) {
-        console.log("Accelerometer already subscripted.");
+        //console.log("Accelerometer already subscripted.");
         this._subscription && this._subscription.remove();
         this._subscription = null;
         Accelerometer.removeAllListeners();
@@ -27,7 +30,7 @@ export default class LocationData extends React.Component {
         Accelerometer.removeAllListeners();
         this._subscription = Accelerometer.addListener(accelerometerData => {
           this.setData(accelerometerData);
-        console.log(Accelerometer.getListenerCount());  
+        //console.log(Accelerometer.getListenerCount());  
         });
       }
       Accelerometer.setUpdateInterval(1600);
@@ -35,11 +38,12 @@ export default class LocationData extends React.Component {
 
     setData = async (accelerometerData) => {
       this.data = accelerometerData;
-      console.log(accelerometerData);
+      //console.log(accelerometerData);
       try {
         const jsonValue = String(JSON.stringify(accelerometerData));
         await AsyncStorage.setItem('@accelerometer', jsonValue);
         console.log("accelerometer data Saved into storage. ");
+        this._getAccData();
       } catch (e) {
         // saving error
         console.log('Fail to save item');
@@ -50,9 +54,28 @@ export default class LocationData extends React.Component {
       try {
         const jsonValue = await AsyncStorage.getItem('@accelerometer');
         if(jsonValue !=null ){
+          //console.log(jsonValue != null ? JSON.parse(jsonValue) : null);
+          this.state.x = round(JSON.parse(jsonValue).x);
+          this.state.y = round(JSON.parse(jsonValue).y);
+          this.state.z = round(JSON.parse(jsonValue).z);
+          console.log("Load finished, data listed below: "); 
+          console.log("x = "+this.state.x);
+          console.log("y = "+this.state.y);
+          console.log("z = "+this.state.z);
+          }       
+      } catch(e) {
+        // error reading value
+        console.log('Fail to load item');
+      }
+    };
+
+    _getLocationData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem('@location');
+        if(jsonValue !=null ){
           console.log(jsonValue != null ? JSON.parse(jsonValue) : null);
           }
-        console.log("Load finished. accelerometer data loaded from storage. ");        
+        console.log("Load finished. Location from storage. ");        
       } catch(e) {
         // error reading value
         console.log('Fail to load item');
@@ -61,8 +84,7 @@ export default class LocationData extends React.Component {
 
   onPress = async () => {
 
-    console.log("on press works!");
-
+    //console.log("on press works!");
     const { status } = await Location.requestPermissionsAsync();
     if (status === "granted") {
         console.log("status granted!");
@@ -82,18 +104,41 @@ export default class LocationData extends React.Component {
 
     }
   };
+  StopBackgroundLocation = async () => {
+    try{
+    //console.log(TaskManager.isTaskDefined("background-location-task"));
+    if(TaskManager.isTaskDefined("background-location-task") == true){
+      Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+      console.log("BG Location stopped");
+    }
+  }catch(e){
+    console.log("Already stopped.");
+  }
+  };
+
+  getPosi = async () => {
+      console.log("current location:");
+      console.log(await Location.getProviderStatusAsync());
+      console.log(await Location.getLastKnownPositionAsync());
+
+  };
 
   render() {
     return (
       <View style = {styles.container}>
-        <TouchableOpacity onPress={this.onPress}>
+        <TouchableOpacity onPress={() => this.getPosi()}>
+          <Text>current location</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.onPress()}>
           <Text>Enable background location</Text>
         </TouchableOpacity>
-        <Text >Accelerometer: (in Gs where 1 G = 9.81 m s^-2)</Text>
-      <Text >
-        x: {this._getAccData().x} y: {this._getAccData().y} z: {this._getAccData().z}
-      </Text>
-      <TouchableOpacity onPress={this._toggle()} >
+        <TouchableOpacity onPress={() => this._getLocationData()}>
+          <Text>Print Location Data</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => this.StopBackgroundLocation()}>
+          <Text>Stop and Upload background location</Text>
+        </TouchableOpacity>
+      <TouchableOpacity onPress={() => this._toggle()} >
           <Text>Start track accelerometer</Text>
         </TouchableOpacity>
       </View>
@@ -161,8 +206,10 @@ TaskManager.defineTask(LOCATION_TASK_NAME, ({ data, error }) => {
           console.log('Fail to load item');
         }
       };
-      console.log(_storeData(locations));
-      console.log(_getData());
+      _storeData(locations);
+      _getData();
+      //console.log(_storeData(locations));
+      //console.log(_getData());
 
 
   }else if(data == null){
