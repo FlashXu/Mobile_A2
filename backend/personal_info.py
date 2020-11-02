@@ -35,6 +35,11 @@ def get_batch_info(db_server, data):
         except ResourceNotFound:
             user_info['total_distance'] = 0
             user_info['completed_sessions'] = 0
+        # Added current ave speed.
+        if 'latest_ave_speed' in doc3.keys():
+            user_info['ave_speed'] = doc3['latest_ave_speed']
+        else:
+            user_info['ave_speed'] = 0
         info_list.append(user_info)
     return info_list
 

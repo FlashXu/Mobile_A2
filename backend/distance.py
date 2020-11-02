@@ -26,6 +26,7 @@ def db_distance(db_server, operation, id = [], data = {}, ranking_type = 'daily'
             new_data['year_distance'] = data['distance']
             new_data['total_distance'] = data['distance']
             new_data['record_time'] = data['start_time']
+            new_data['latest_ave_speed'] = data['ave_speed']
             new_data['total_sessions'] = 1
             if data['status'] == 'completed':
                 new_data['completed_sessions'] = 1
@@ -71,6 +72,7 @@ def db_distance(db_server, operation, id = [], data = {}, ranking_type = 'daily'
 
             # New data
             if record_time > db_record_time:
+                current_record['latest_ave_speed'] = data['ave_speed']
                 current_record['record_time'] = data['start_time']
                 if db_day != record_day:
                     current_record['daily_distance'] = data['distance']
@@ -155,12 +157,19 @@ def db_distance(db_server, operation, id = [], data = {}, ranking_type = 'daily'
             try:
                 doc = dict(db[current_id])
                 distance = doc[distance_keyword]
+                if 'latest_ave_speed' in doc.keys():
+                    ave_speed = doc['latest_ave_speed']
+                else:
+                    ave_speed = 0
                 if doc[date_keyword] == this_item:
                     info_list['distance'] = distance
+                    info_list['ave_speed'] = ave_speed
                 else:
                     info_list['distance'] = 0
+                    info_list['ave_speed'] = 0
             except ResourceNotFound:
                 info_list['distance'] = 0
+                info_list['ave_speed'] = 0
             # Add user's name into it.
             try:
                 doc1 = dict(personal_info_db[current_id])
