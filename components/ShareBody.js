@@ -71,6 +71,10 @@ class ShareBody extends Component {
       } 
       this.componentDidMount();
   }
+
+  popUpMap(value) {
+    alert("Map for " + value.postId)
+  }
  
   async GET(url){
     const results = await fetch(url,{
@@ -271,9 +275,9 @@ class ShareBody extends Component {
           trainingSessions.map((value,i)=>{
             return (
               <TouchableOpacity onPress={context.sessionOnPress.bind(context)} style={styles.mainTab} key={i}>
-                <View style={{flex:1, alignItems:"center"}}>
+                <TouchableOpacity onPress={()=>context.popUpMap(value)} style={{flex:1, alignItems:"center"}}>
                   <Image source={trainingSessions[i].mapImage} style={styles.image} />
-                </View>
+                </TouchableOpacity>
                 
                 <View style={{flex:2,marginLeft:20}}>
                   <Text style={styles.sessionTitleLarge}>{trainingSessions[i].userName}</Text>

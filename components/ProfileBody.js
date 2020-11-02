@@ -141,6 +141,10 @@ class ProfileBody extends Component {
         }
     }
 
+    popUpMap(value) {
+      alert("Map for " + value.id)
+    }
+
     // // 图片存至本机相册
     // saveFile = async (fileUri) => {
     //   const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
@@ -335,9 +339,9 @@ class ProfileBody extends Component {
                         <Text style={styles.sessionTitle}>Time: {trainingSessions[i].time}</Text>
                         <Text style={styles.sessionTitle}>Status: {trainingSessions[i].status}</Text>
                       </View>
-                      <View style={{flex:1, alignItems:"center"}}>
-                        <Image source={trainingSessions[i].mapImage} style={styles.image} />
-                      </View>
+                      <TouchableOpacity onPress={()=>context.popUpMap(value)} style={{flex:1, alignItems:"center"}}>
+                        <Image  source={trainingSessions[i].mapImage} style={styles.image} />
+                      </TouchableOpacity>
                     </TouchableOpacity>
               );
             })
