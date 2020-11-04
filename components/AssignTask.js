@@ -310,7 +310,7 @@ class AssignTask extends Component {
         // get the route
         var route = this.state.selectedRouteOption;
         // Print
-        // console.log(length + " " + route);
+        console.log("rendering page");
 
         const lengthOptions = [
             "Short",
