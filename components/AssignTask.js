@@ -57,7 +57,13 @@ class AssignTask extends Component {
 
         navigator.geolocation.getCurrentPosition(
             position => {
-                this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} });
+                this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} },()=>{
+                    //update map here
+                    
+                    console.log(this.state.startPos)
+                
+                
+                });
             }
         );
 
@@ -116,6 +122,14 @@ class AssignTask extends Component {
 
     componentDidMount() {
         this._updateNativeStyles();
+
+        // navigator.geolocation.getCurrentPosition(
+            
+        //     position => {
+        //         console.log("test2    " + position.coords.latitude)
+        //         this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} },()=>console.log(this.state.startPos));
+        //     }
+        // );
     }
 
 
@@ -296,7 +310,7 @@ class AssignTask extends Component {
         // get the route
         var route = this.state.selectedRouteOption;
         // Print
-        console.log(length + " " + route);
+        // console.log(length + " " + route);
 
         const lengthOptions = [
             "Short",
