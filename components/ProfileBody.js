@@ -125,16 +125,16 @@ class ProfileBody extends Component {
                   var user_running_records = [];
                   for(let i = 0; i < record_list.length; i++){
                     var running_record_item = record_list[i];
-                    //应该是ID不对
-                    // getAttach('running_record', id,'coordinate.json').then(function(res){
-                    //   if(res.hasOwnProperty('resp')){
-                    //     // 有resp 说明返回resp=404
-                    //     alert('There is no such a file!');
-                    //   }else{
-                    //     // 成功返回坐标
-                    //     alert(JSON.stringify(res))
-                    //   }
-                    // })
+                    getAttach('running_record', record_list[i]._id, 'coordinate.json')
+                        .then((res) => {
+                          if(res.hasOwnProperty('resp')){
+                            // 有resp 说明返回resp=404
+                            console.log('There is no such a file!');
+                          }else{
+                            // 成功返回坐标
+                            coordinates_i=JSON.stringify(res);
+                          }
+                        })
                     var record_structure = {
                       id: record_list[i]._id,
                       totalDistance:record_list[i].distance,
@@ -153,7 +153,7 @@ class ProfileBody extends Component {
                 }
               }
             })
-          }}, storeinfo, opDBdata, pageObj);
+          }}, storeinfo, opDBdata, pageObj,getAttach);
         
         
         
