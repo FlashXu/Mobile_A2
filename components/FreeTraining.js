@@ -283,7 +283,7 @@ class FreeTraining extends Component {
                                 <View style={styles.line} />
                             </View>
                             <View style={styles.textView}>
-                                <Text style={styles.text}>Distance Ran</Text>
+                                <Text style={styles.text}>Distance Run</Text>
                                 <Text style={styles.text}>Time</Text>
                             </View>
                             <View style={styles.textView}>

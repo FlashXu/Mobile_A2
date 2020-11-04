@@ -27,7 +27,11 @@ class FriendsBody extends Component {
         getDBdata(url).then(function(res){
           if(res.resp == 404){
             alert('The user has no friends!');
+            pageObj.setState({pageLoading:false});
           }else{
+            if (!res.friends_list.length) {
+              pageObj.setState({pageLoading:false});
+            }
             var friends_idlist = res.friends_list;
             pageObj.setState({friends_idlist:friends_idlist});
             pageObj.update_friends_info();

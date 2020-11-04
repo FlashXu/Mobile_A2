@@ -1,6 +1,6 @@
 'use strict';
 import React, { Component } from 'react';
-import Svg, { G, Circle, Rect, Path } from 'react-native-svg';
+import Svg, { G, Circle, Rect, Path, Marker } from 'react-native-svg';
 import {
     Dimensions,
     PanResponder,
@@ -21,6 +21,15 @@ import Food3 from '../assets/Food3.png';
 import Food4 from '../assets/Food4.png';
 import { MaterialIcons } from '@expo/vector-icons';
 
+import MapView, { 
+    Polyline,
+  } from "react-native-maps";
+import MapViewDirections from 'react-native-maps-directions';
+
+const origin = {latitude: 35.72807531139474, longitude: 139.7671613636778};
+const destination = {latitude: 35.728075, longitude: 139.767161};
+const google_api = "AIzaSyAEdYRovFA01ytQ3bu0mbkwOTsehMv7lv8";
+
 class AssignTask extends Component {
     constructor(props) {
         super(props);
@@ -29,6 +38,10 @@ class AssignTask extends Component {
         this.state = {
             selectedLengthOption: this.props.selectedLengthOption || "Short",
             selectedRouteOption: this.props.selectedRouteOption || "Route 1",
+            startPos: 0,
+            origin: {latitude: 35.72807531139474, longitude: 139.7671613636778},
+            destination: {latitude: 35.72807531139474, longitude: 139.7671613636778},
+            path:[],
             totalDistance: 6,
             distance: 4,
             time: '00:00:00',
@@ -40,6 +53,14 @@ class AssignTask extends Component {
             displayStart: 'flex',
             displayDetail: 'none',
         };
+
+
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} });
+            }
+        );
+
         this._panResponder = {};
         this._previousHeight = menuShowHeight;
         this._menuStyles = {};
@@ -90,12 +111,185 @@ class AssignTask extends Component {
                 height: this._previousHeight,
             }
         };
+
     }
 
     componentDidMount() {
         this._updateNativeStyles();
     }
 
+
+
+    generateRoute(path) {
+        var pathValues = [];
+        for (var i = 0; i < path.length; i++) {
+            var str = path[i].lat + "," + path[i].lng;
+            pathValues.push(str);
+        }
+        
+
+        var url = 'https://roads.googleapis.com/v1/nearestRoads?points=' + pathValues.join("|") + '&key=' + google_api; 
+        // console.log(url);
+        // this.GET(url).then((res) => console.log(JSON.stringify(res)));
+        this.GET(url).then((res) => this.processNearestRoadsResponse(res));
+        
+    }
+
+    processNearestRoadsResponse(data) {
+        var placeIdArray = [];
+        var wayPointsArray = [];
+        let indexCount = 0;
+        
+        for (let i = 0; i < data.snappedPoints.length; i++) {
+            let originalIndex = data.snappedPoints[i].originalIndex;
+            if (originalIndex == indexCount) {
+                placeIdArray.push(data.snappedPoints[i].placeId);
+                if (originalIndex > 0 && originalIndex < 4) {
+                    wayPointsArray.push(data.snappedPoints[i].placeId);
+                }
+                indexCount++;
+            }
+        }
+        
+
+        var origin = 'place_id:' + placeIdArray[0];
+        var destination = 'place_id:' + placeIdArray[4];
+        var waypoints = 'place_id:' + wayPointsArray.join('|place_id:');
+        var mode = 'WALKING';
+
+        var url = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + origin + '&destination=' + destination + '&mode=' + mode + '&waypoints=' + waypoints + '&key=' + google_api;
+        // this.GET(url).then((res) => console.log(JSON.stringify(res)));
+
+        this.GET(url).then((res) => this.decodingLine(res));
+        
+    }
+
+    decodingLine(line){
+        var overview = line.routes[0].overview_polyline.points;
+        // console.log(overview);
+        var directs = this.decode(overview);
+        // console.log(directs);
+        this.setState({path: directs})
+    }
+
+    getPoints(startLatLng, difficulty, route_num) {
+        let step;
+        let path = [startLatLng];
+        let curLat = startLatLng.lat;
+        let curLng = startLatLng.lng;
+        
+        //根据难度调节step
+        switch (difficulty) {
+          case "Short":
+            step = 0.0025;
+            break;
+          case "Medium":
+            step = 0.0075;
+            break;
+          case "Long":
+            step = 0.0125;
+            break;
+          default:
+            break;
+        }
+        
+        //从初始点向四个方向形成四个路线
+        switch (route_num) {
+          case "Route 1":
+            curLat += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLat -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            break;
+      
+          case "Route 2":
+            curLat += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLat -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            break;
+      
+          case "Route 3":
+            curLat -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLat += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            break;
+      
+          case "Route 4":
+            curLat -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng -= step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLat += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            curLng += step;
+            path.push({ lat: curLat, lng: curLng });
+      
+            break;
+      
+          default:
+            break;
+        }
+        return path;
+      }
+
+
+    decode(t, e) {
+    for (var n, o, u = 0, l = 0, r = 0, d = [], h = 0, i = 0, a = null, c = Math.pow(10, e || 5); u < t.length;) {
+        a = null, h = 0, i = 0;
+        do a = t.charCodeAt(u++) - 63, i |= (31 & a) << h, h += 5; while (a >= 32);
+        n = 1 & i ? ~(i >> 1) : i >> 1, h = i = 0;
+        do a = t.charCodeAt(u++) - 63, i |= (31 & a) << h, h += 5; while (a >= 32);
+        o = 1 & i ? ~(i >> 1) : i >> 1, l += n, r += o, d.push([l / c, r / c])
+    }
+    return d = d.map(function (t) {
+        return {
+        latitude: t[0],
+        longitude: t[1]
+        }
+    })
+    }
+
+    async GET(url){ 
+        var data = await fetch(url,{
+          method: 'GET'
+        })
+          .then((response) => response.json())
+          .catch((error) => {
+            console.error(error);
+        });
+        return data;
+    }
+
+    
     render = (props) => {
         // get the length
         var length = this.state.selectedLengthOption;
@@ -130,6 +324,13 @@ class AssignTask extends Component {
             FoodImage = Food3;
         if (Calories > 1000)
             FoodImage = Food4;
+
+        
+        var length = this.state.selectedLengthOption;
+        var route = this.state.selectedRouteOption;
+        var points = this.getPoints(this.state.startPos, length, route);
+        this.generateRoute(points);
+
         // Circular progress bar data
         const α = interpolate(prograss, {
             inputRange: [0, 1],
@@ -198,12 +399,18 @@ class AssignTask extends Component {
 
         return (
             <View style={{ flex: 1, backgroundColor: 'pink' }} >
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
-                <Text style={{ color: 'blue' }}>Map here!</Text>
+                <MapView
+                    style={styles.map}
+                    showsUserLocation={true}
+                    style={{ flex: 2 }}
+                    followsUserLocation={true}
+                    //region={this.getMapRegion()}
+                >
+                <Polyline coordinates={this.state.path} strokeWidth={5} strokeColor="#5DA6FE"/>
+                <MapView.Marker coordinate={origin} />
+                <MapView.Marker coordinate={destination} />
+                </MapView>
+
                 <View style={{
                     marginTop: h * 0.07,
                     marginHorizontal: w * 0.05,
