@@ -8,7 +8,9 @@ import Moment from 'moment';
 // import * as FileSystem from 'expo-file-system';
 // import * as MediaLibrary from 'expo-media-library';
 // import * as Permissions from 'expo-permissions';
-
+import MapView, { 
+  Polyline,
+} from "react-native-maps";
 class ProfileBody extends Component {
     constructor(props) {
         super(props)
@@ -16,6 +18,7 @@ class ProfileBody extends Component {
         var getDBdata = this.GET;
         var opDBdata = this.bodyOperation;
         var storeinfo = this.storeData;
+        var getAttach = this.get_attachments;
         var pageObj = this;
         // var downloadImg = this.downloadPhoto;
         
@@ -89,6 +92,17 @@ class ProfileBody extends Component {
             })
           }}, storeinfo, getDBdata, pageObj);
 
+            // this.get_attachments('running_record',id,'coordinate.json')
+            // .then((res) => {
+            //   if(res.hasOwnProperty('resp')){
+            //     // 有resp 说明返回resp=404
+            //     alert('There is no such a file!');
+            //   }else{
+            //     // 成功返回坐标
+            //     alert(JSON.stringify(res))
+            //   }
+            // })
+
         // 获取running record并保存
         this.getID().then(function(id){
           if(id!=null){
@@ -96,11 +110,13 @@ class ProfileBody extends Component {
             var data = JSON.stringify({
               "query_key":[[id], [id +'CHANGE']]
             }); 
+
             opDBdata(url, data,'POST').then(function(res){
               if(res.resp == 404){
                 alert('There is no running records!');
               }else{
                 var record_list = res.record_detail;
+
                 if(record_list.length > 0){
                   // Set ave speed to be the latest ave. speed.
                   pageObj.setState({avgSpeed: record_list[0].ave_speed});
@@ -109,13 +125,24 @@ class ProfileBody extends Component {
                   var user_running_records = [];
                   for(let i = 0; i < record_list.length; i++){
                     var running_record_item = record_list[i];
+                    //应该是ID不对
+                    // getAttach('running_record', id,'coordinate.json').then(function(res){
+                    //   if(res.hasOwnProperty('resp')){
+                    //     // 有resp 说明返回resp=404
+                    //     alert('There is no such a file!');
+                    //   }else{
+                    //     // 成功返回坐标
+                    //     alert(JSON.stringify(res))
+                    //   }
+                    // })
                     var record_structure = {
                       id: record_list[i]._id,
                       totalDistance:record_list[i].distance,
                       avgSpeed:record_list[i].ave_speed,
                       time:record_list[i].start_time,
                       status:record_list[i].status,
-                      mapImage:require('../assets/map1.png')
+                      mapImage:require('../assets/map1.png'),
+
                     }
                     user_running_records.push(record_structure);
                   }
@@ -142,7 +169,15 @@ class ProfileBody extends Component {
     }
 
     popUpMap(value) {
-      alert("Map for " + value.id)
+      //alert("Map for " + value.id)
+      <MapView
+        style={styles.map}
+        showsUserLocation={true}
+        style={{ flex: 2 }}
+        followsUserLocation={true}
+      //region={this.getMapRegion()}
+      >
+    </MapView>
     }
 
     // // 图片存至本机相册
@@ -190,6 +225,7 @@ class ProfileBody extends Component {
       var current_time = Moment(date).format('YYYY-MM-DD HH:mm:ss');
       var pageObj = this;
       var opDBdata = this.bodyOperation;
+      
       this.getID().then((id) => {
         if(id != null){
           var data = JSON.stringify({
@@ -256,7 +292,17 @@ class ProfileBody extends Component {
           return null;
       }
     }
-
+    async get_attachments(db_name, mount_id, attachment_name){
+      var url = 'http://www.mobileappproj.ml:5000/attachments/' + db_name + '/' + mount_id + '/' + attachment_name;
+      var file = await fetch(url, {
+        method: 'GET',
+      })
+      .then((response) => response.json())
+      .catch((error) => {
+        console.error(error);
+      });
+      return file;
+    }
     async removeProfile(){
       try {
            // Update online info.

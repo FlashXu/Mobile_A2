@@ -37,7 +37,9 @@
     "react-native-sensors": "^7.0.1",
     "react-native-svg": "12.1.0",
     "react-native-textarea": "^1.0.4",
-    "react-native-web": "~0.13.12"
+    "react-native-web": "~0.13.12",
+    "text-decoding": "^1.0.0",
+    "text-encoding": "^0.7.0"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0"
