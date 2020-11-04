@@ -2,9 +2,6 @@
 import React, { Component, useState } from 'react';
 import Svg, { G,Path } from 'react-native-svg';
 import { DangerZone } from 'expo';
-import * as encoding from 'text-encoding';
-import * as decoding from 'text-decoding';
-import Moment from 'moment';
 import {
     Dimensions,
     PanResponder,
@@ -21,7 +18,10 @@ import MapView, {
     Polyline,
   } from "react-native-maps";
 
-
+import Food1 from '../assets/Food1.png';
+import Food2 from '../assets/Food2.png';
+import Food3 from '../assets/Food3.png';
+import Food4 from '../assets/Food4.png';
 import water from '../assets/water.png';
 import salad from '../assets/salad.png';
 import mushroom from '../assets/mushroom.png';
@@ -79,6 +79,7 @@ class FreeTraining extends Component {
     
         //上传用的网络连接方法
         async bodyOperation(url, data, operation){
+            console.log("data1"+data)
             var data = await fetch(url,{
             method: operation,
             body: data
@@ -87,60 +88,52 @@ class FreeTraining extends Component {
             .catch((error) => {
                 console.error(error);
             });
+            console.log(data)
             return data;
         }
         //绑在按钮上的方法
-        uploadRunningRecord = () => {
-            let date = new Date();
-            var current_time = Moment(date).format('YYYY-MM-DD HH:mm:ss');
-            var pageObj = this;
-            var opDBdata = this.bodyOperation;
-            this.getID().then((id) => {
-                if(id!=null){
-                    var url = 'http://www.mobileappproj.ml:5000/running_record';
-                    var data = JSON.stringify({
-                        "distance": pageObj.state.distance.toFixed(2), // 总距离
-                        "end_time":  current_time, // 结束时间
-                        "start_time": pageObj.state.startTime, // 开始时间
-                        "ave_speed": pageObj.state.speed.toFixed(2), // 平均速度
-                        "user_id": id, // 用户id
-                        "status": 'completed'// 完成情况
-                        //附件的generated id？
-                      });
-                      //这里应该再保存每次跑完步的记录ID
-                    opDBdata(url, data, 'POST').then((res) => {
-                        if(res.resp == 406){
-                          alert('Record is already existed!');
-                        }else{
-                            //此处调用上传附件的方法，上传对应running_record的系列坐标
-                            //alert('success');
-                            pageObj.upload_attachments('running_record',res.gen_id,'coordinate.json');
-                            //alert('Success! The generated id is: ' + res.gen_id);
-                        }
-                      });
-                  
+          uploadRunningRecord = () => {
+            var date = new Date().getDate(); //Current Date
+            var month = new Date().getMonth() + 1; //Current Month
+            var year = new Date().getFullYear(); //Current Year
+            var hours = new Date().getHours(); //Current Hours
+            var min = new Date().getMinutes(); //Current Minutes
+            var sec = new Date().getSeconds(); //Current Seconds
+            var userId = this.getID();
+            var data = JSON.stringify({
+                "distance": this.state.distance, // 总距离
+                "end_time": ""+date + '/' + month + '/' + year + ' ' + hours + ':' + min + ':' + sec, // 结束时间
+                "start_time": ""+this.state.startTime, // 开始时间
+                "ave_speed": this.state.speed, // 平均速度
+                "user_id": userId, // 用户id
+                "status":  this.state.status// 完成情况
+              })
+              console.log(data)
+              var url = 'http://www.mobileappproj.ml:5000/running_record';
+            this.bodyOperation(url, data, 'POST').then((res) => {
+                if(res.resp == 406){
+                  alert('Record is already existed!');
+                }else{
+                //此处调用上传附件的方法，上传对应running_record的系列坐标
+                console.log("here3")
+                upload_attachments('running_record',res.gen_id,'coordinate.json');
+                alert('Success! The generated id is: ' + res.gen_id);
                 }
-
-            }, current_time, pageObj, opDBdata);
-        }
- 
+              })
+          }
     
         // 上传json附件到db_name里的mount_id，并起名字为attachment_name
         async upload_attachments(db_name, mount_id, attachment_name){
-            var coordinate = this.state.coordinates;
-            //console.log("coor原始"+coordinate)
+            var coordinate = this.state.coordinate;
             var data = {'coordinate': coordinate}; // JSON obj
+            console.log(data)
             //将 JSON obj转化为blob上传blob
             const str = JSON.stringify(data);
-            //JSON解码 JSON.parse
-            //console.log("JSON后"+str)
-            const bytes = new encoding.TextEncoder().encode(str);
-            //const t = new encoding.TextDecoder().decode(bytes);
-            //decode 解码
+
+            const bytes = new TextEncoder().encode(str);
             const blob = new Blob([bytes], {
                 type: "application/json;charset=utf-8"
             });
-            console.log("blob"+blob)
             var url = 'http://www.mobileappproj.ml:5000/attachments/' + db_name + '/' + mount_id + '/' + attachment_name;
             var resp = await fetch(url, {
             method: 'PUT',
@@ -179,14 +172,13 @@ class FreeTraining extends Component {
     startButton() {
         //按键反馈
         this.setState({ loading: true });
-        var startTime = new Date().getTime();
-        let date = new Date();
+        var startTime = new Date().getTime()
         if(!this.state.startRun & this.state.paused){
             this.setState({ paused: false })
         }
         //startRun 表示最开始的准备工作
         if (this.state.startRun) {
-            this.setState({ startTime: Moment(date).format('YYYY-MM-DD HH:mm:ss') })
+            this.setState({ startTime: new Date() })
 
             this.setState({ test: "Tracking Run1" })
             this.setState({ button: true,  startRun: false, loading:false })
@@ -209,7 +201,7 @@ class FreeTraining extends Component {
                 this.setState({ test: "Tracking Run2" })
                 navigator.geolocation.getCurrentPosition(
                     position => {
-                        var currentPosition = { latitude: position.coords.latitude,longitude:position.coords.longitude};
+                        var currentPosition = position.coords;
                         this.setState({ previousPosition: currentPosition })
                     }
                 )
@@ -259,8 +251,8 @@ class FreeTraining extends Component {
         setTimeout(() => this.intervalTrackingID = setInterval(() => {
             navigator.geolocation.getCurrentPosition(
                 position => {
-                    var currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude} ;
-                    this.state.currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude}
+                    var currentPosition = position.coords;
+                    this.state.currentPosition = currentPosition
                     this.setState({ coordinates: this.state.coordinates.concat([currentPosition]) })
 
                     this.setState({ distance: this.state.distance + (this.coordDistance(currentPosition))* 1.609 })
@@ -299,8 +291,8 @@ class FreeTraining extends Component {
                     text: "Terminate",
 
                     onPress: () => {
-                        this.uploadRunningRecord(); 
-                        this.navigation.navigate('MainMenuPage');}
+                        this.uploadRunningRecord(), 
+                        this.navigation.navigate('MainMenuPage')}
                 },
                 {
                     text: "Continue",
@@ -358,6 +350,7 @@ class FreeTraining extends Component {
 //
         return (
             <View style={{ flex: 1, backgroundColor: 'pink' }} >
+                <Text >{this.state.test}</Text>
                 <MapView
                     style={styles.map}
                     showsUserLocation={true}
