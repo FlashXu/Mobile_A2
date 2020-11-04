@@ -13,6 +13,7 @@ import {
     Text,
     Alert
 } from 'react-native';
+import Moment from 'moment';
 import { RadioButtons } from 'react-native-radio-buttons';
 import { interpolate, multiply } from 'react-native-reanimated';
 import Food1 from '../assets/Food1.png';
@@ -20,7 +21,8 @@ import Food2 from '../assets/Food2.png';
 import Food3 from '../assets/Food3.png';
 import Food4 from '../assets/Food4.png';
 import { MaterialIcons } from '@expo/vector-icons';
-
+import haversine from "haversine";
+import calculateCalories from '../components/CalculateCalories'
 import MapView, { 
     Polyline,
   } from "react-native-maps";
@@ -43,15 +45,24 @@ class AssignTask extends Component {
             destination: {latitude: 35.72807531139474, longitude: 139.7671613636778},
             path:[],
             totalDistance: 6,
-            distance: 4,
+            distance: 0,
             time: '00:00:00',
-            AvgSpeed: 2.0,
-            CurrentSpeed: 1.0,
-            Calories: 600,
-
+            speed: 0.0,
+            currSpeed: 1.0,
+            Calories: 0,
+            coordinates: [],
+            secs: 0,
+            mins: 0,
+            hrs: 0,
+            startTime: "00:00:00",
             startPressed: false,
             displayStart: 'flex',
             displayDetail: 'none',
+            startRun: true,
+            paused: false,
+            button: false,
+            currentPosition : 0,
+            loading: false,
         };
 
 
@@ -60,7 +71,7 @@ class AssignTask extends Component {
                 this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} },()=>{
                     //update map here
                     
-                    console.log(this.state.startPos)
+                    //console.log(this.state.startPos)
                 
                 
                 });
@@ -73,13 +84,147 @@ class AssignTask extends Component {
         // this.menu = (null : ?{ setNativeProps(props): void });
         this.show = true;
     }
+    formatStats = () => {
+        var formatSec = "" + this.state.sec;
+        formatSec = formatSec.padStart(2, '0');
+        var formatMin = "" + this.state.min; 
+        formatMin = formatMin.padStart(2, '0')
 
+        var formatHour = "" + this.state.hour; 
+        formatHour = formatHour.padStart(2, '0')
+        var totalTimeSecs = (this.state.hour * 60 * 60) + (this.state.min * 60) + this.state.sec + (this.state.mili / 1000);
+        if (totalTimeSecs !== 0) {
+            var speed =  this.state.distance*1000/totalTimeSecs
+            this.setState({ speed: speed })
+
+        }
+        this.setState({
+            time:  formatHour + ":" + formatMin + ":" + formatSec,
+        })
+        this.setState({ test: "route"+this.state.route})
+
+    }
     startButton() {
         //按键反馈
         this.setState({ startPressed: true, displayStart: 'none', displayDetail: 'flex' });
-        //this.navigation.navigate('AssignTask');
-    }
+        this.setState({ loading: true });
+        var startTime = new Date().getTime();
+        let date = new Date();
+        if(!this.state.startRun & this.state.paused){
+            this.setState({ paused: false })
+        }
+        //startRun 表示最开始的准备工作
+        if (this.state.startRun) {
+            this.setState({ startTime: Moment(date).format('YYYY-MM-DD HH:mm:ss') })
+            this.startTracking()
+            this.setState({ test: "Tracking Run1" })
+            this.setState({ button: true,  startRun: false, loading:false })
+            this.state.startRun = false
+            //console.log("1 "+this.state.startRun)
+            setTimeout(() => this.intervalID = setInterval(() => {
+                var diff = startTime - new Date().getTime();
+                var hr = Math.floor(-diff / 3600000)
+                var mili = -diff - 3600000 * hr
+                var min = Math.floor(mili / 60000);
+                mili = mili - 60000 * min;
+                var sec = mili / 1000;
+                mili = mili - 1000 & sec;
+                min = min.toFixed(0);
+                sec = sec.toFixed(0);
+                this.setState({ hour: parseInt(hr), min: parseInt(min), sec: parseInt(sec), mili: parseInt(mili) })
+                this.formatStats()
+            }, 500), 1000 / 60);        
+        }else{
+            if (this.state.paused) {
 
+                this.setState({ test: "Tracking Run2" })
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        var currentPosition = { latitude: position.coords.latitude,longitude:position.coords.longitude};
+                        this.setState({ previousPosition: currentPosition })
+                    }
+                )
+                this.startTracking()
+                var pauseSec = this.state.sec;
+                var pauseMin = this.state.min;
+                var pauseHour = this.state.hour;
+                setTimeout(() => this.intervalID = setInterval(() => {
+                    this.setState({ button: true })
+                    var diff = startTime - new Date().getTime();
+                    var hr = Math.floor(-diff / 3600000)
+                    var mili = -diff - 3600000 * hr
+                    var min = Math.floor(mili / 60000);
+                    mili = mili - 60000 * min;
+                    var sec = mili / 1000;
+                    mili = mili - 1000 & sec;
+                    min = min.toFixed(0);
+                    sec = sec.toFixed(0);
+                    //Add new time differnce to old time differnce 
+
+                    var newSec = pauseSec + parseInt(sec)
+                    var newMin = pauseMin + parseInt(min)
+                    var newHour = pauseHour + parseInt(hr)
+
+                    while (newSec >= 60) {
+                        newSec = newSec - 60;
+                        newMin = newMin + 1;
+                    }
+                    while (newMin >= 60) {
+                        newMin = newMin - 60;
+                        newHour = newHour + 1;
+                    }
+                    this.setState({ hour: newHour, min: newMin, sec: newSec, mili: parseInt(mili)});
+                    this.formatStats()
+                }, 500), 500 / 60);
+
+            }else{
+                this.setState({ test: "Run Paused" })
+                this.setState({ button: false, loading:false })
+                this.setState({ paused: true })
+                clearInterval(this.intervalID);
+                clearInterval(this.intervalTrackingID)
+            }
+    }
+}
+    startTracking = () => {
+
+        setTimeout(() => this.intervalTrackingID = setInterval(() => {
+            
+            navigator.geolocation.getCurrentPosition(
+                position => {
+
+                    var currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude} ;
+                    this.state.currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude}
+                    this.setState({ coordinates: this.state.coordinates.concat([currentPosition]) })
+ 
+                    this.setState({ distance: this.state.distance + (this.coordDistance(currentPosition))* 1.609 })
+
+                    this.setState({test:this.coordDistance(currentPosition)})
+               
+                    this.setState({ previousPosition: currentPosition })
+                
+                    //geopoint = new GeoPoint(currentPosition.latitude, currentPosition.longitude)
+                  
+                    //this.setState({route:route})
+                    this.setState({ test: "is tracking" })
+                    this.setState({ currSpeed:  position.coords.speed })
+                }
+
+            )
+
+            if (this.state.distance !== 0) {
+                var totalTimeSecs = (this.state.hour * 60 * 60) + (this.state.min * 60) + this.state.sec + (this.state.mili / 1000);
+                let kmPerHour = ((this.state.distance * 1.609)) / ((totalTimeSecs / 60) / 60)
+                //这里将体重默认设置为60
+                let cal = calculateCalories(( 60 * .435), kmPerHour, (totalTimeSecs / 60))
+                this.setState({ Calories: cal })
+            }
+
+        }, 500), 300);
+    }
+    coordDistance = (position) => {
+        return haversine(this.state.previousPosition, position, { unit: 'mile' }) || 0;
+    }
     backButton() {
         if (this.state.displayStart == 'flex')
             this.navigation.goBack();
@@ -103,6 +248,7 @@ class AssignTask extends Component {
     }
 
     componentWillMount() {
+        clearInterval(this.intervalId, this.intervalTrackingID);
         this._panResponder = PanResponder.create({
             onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
             onMoveShouldSetPanResponder: this._handleMoveShouldSetPanResponder,
@@ -310,7 +456,7 @@ class AssignTask extends Component {
         // get the route
         var route = this.state.selectedRouteOption;
         // Print
-        console.log("rendering page");
+        //console.log("rendering page");
 
         const lengthOptions = [
             "Short",
@@ -325,11 +471,11 @@ class AssignTask extends Component {
             "Route 4"
         ];
         var totalDistance = this.state.totalDistance;
-        var distance = this.state.distance;
+        var distance = this.state.distance.toFixed(1);
         var time = this.state.time;
-        var AvgSpeed = this.state.AvgSpeed;
-        var CurrentSpeed = this.state.CurrentSpeed;
-        var Calories = this.state.Calories;
+        var AvgSpeed = this.state.speed.toFixed(1);
+        var CurrentSpeed = this.state.currSpeed.toFixed(1);
+        var Calories = this.state.Calories.toFixed(1);
         var prograss = distance / totalDistance;
         var FoodImage = Food1;
         if (Calories > 200)
@@ -421,6 +567,8 @@ class AssignTask extends Component {
                     //region={this.getMapRegion()}
                 >
                 <Polyline coordinates={this.state.path} strokeWidth={5} strokeColor="#5DA6FE"/>
+                <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
+                
                 <MapView.Marker coordinate={origin} />
                 <MapView.Marker coordinate={destination} />
                 </MapView>
@@ -555,7 +703,18 @@ class AssignTask extends Component {
                                     </View>
                                 </View>
                             </View>
-
+                            <View style={{ alignItems: "center" }}>
+                                {
+                                this.state.button ? 
+                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
+                                         <Text style={ styles.text2}> Pause </Text>
+                                    </TouchableOpacity>                                    
+                                    :           
+                                    <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
+                                        <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Start </Text>
+                                    </TouchableOpacity>              
+                                }
+                                </View>
                         </View>
                     </View>
                 </View>
