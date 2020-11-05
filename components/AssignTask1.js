@@ -1,6 +1,5 @@
 'use strict';
 import React, { Component } from 'react';
-import { FontAwesome } from '@expo/vector-icons';
 import Svg, { G, Circle, Rect, Path, Marker } from 'react-native-svg';
 import {
     Dimensions,
@@ -12,16 +11,15 @@ import {
     TouchableWithoutFeedback,
     TouchableOpacity,
     Text,
-    Alert,
-    ActivityIndicator
+    Alert
 } from 'react-native';
 import Moment from 'moment';
 import { RadioButtons } from 'react-native-radio-buttons';
 import { interpolate, multiply } from 'react-native-reanimated';
-import water from '../assets/water.png';
-import salad from '../assets/salad.png';
-import mushroom from '../assets/mushroom.png';
-import strawberry from '../assets/strawberry.png';
+import Food1 from '../assets/Food1.png';
+import Food2 from '../assets/Food2.png';
+import Food3 from '../assets/Food3.png';
+import Food4 from '../assets/Food4.png';
 import { MaterialIcons } from '@expo/vector-icons';
 import haversine from "haversine";
 import calculateCalories from '../components/CalculateCalories'
@@ -32,8 +30,7 @@ import MapViewDirections from 'react-native-maps-directions';
 
 const origin = {latitude: 35.72807531139474, longitude: 139.7671613636778};
 const destination = {latitude: 35.728075, longitude: 139.767161};
-// const google_api = "AIzaSyAEdYRovFA01ytQ3bu0mbkwOTsehMv7lv8";
-const google_api = "AIzaSyAFoGILtCZjnjEoEj4ZQrqWSY4mWz02OY0";
+const google_api = "AIzaSyAEdYRovFA01ytQ3bu0mbkwOTsehMv7lv8";
 
 class AssignTask extends Component {
     constructor(props) {
@@ -43,7 +40,7 @@ class AssignTask extends Component {
         this.state = {
             selectedLengthOption: this.props.selectedLengthOption || "Short",
             selectedRouteOption: this.props.selectedRouteOption || "Route 1",
-            startPos: {latitude: 35.72807531139474, longitude: 139.7671613636778},
+            startPos: 0,
             origin: {latitude: 35.72807531139474, longitude: 139.7671613636778},
             destination: {latitude: 35.72807531139474, longitude: 139.7671613636778},
             path:[],
@@ -65,7 +62,7 @@ class AssignTask extends Component {
             paused: false,
             button: false,
             currentPosition : 0,
-            loading: false
+            loading: false,
         };
 
 
@@ -73,13 +70,10 @@ class AssignTask extends Component {
             position => {
                 this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} },()=>{
                     //update map here
-
-                    var length = this.state.selectedLengthOption;
-                    var route = this.state.selectedRouteOption;
-                    var points = this.getPoints(this.state.startPos, length, route);
-                    this.generateRoute(points);
-
+                    
                     //console.log(this.state.startPos)
+                
+                
                 });
             }
         );
@@ -112,7 +106,8 @@ class AssignTask extends Component {
     }
     startButton() {
         //按键反馈
-        this.setState({ loading: true, displayStart: 'none', displayDetail: 'flex' });
+        this.setState({ startPressed: true, displayStart: 'none', displayDetail: 'flex' });
+        this.setState({ loading: true });
         var startTime = new Date().getTime();
         let date = new Date();
         if(!this.state.startRun & this.state.paused){
@@ -235,7 +230,7 @@ class AssignTask extends Component {
             this.navigation.goBack();
         else {
             Alert.alert(
-                "Exit?",
+                "Pause",
                 "",
                 [
                     {
@@ -272,7 +267,15 @@ class AssignTask extends Component {
     }
 
     componentDidMount() {
-        // this._updateNativeStyles();
+        this._updateNativeStyles();
+
+        // navigator.geolocation.getCurrentPosition(
+            
+        //     position => {
+        //         console.log("test2    " + position.coords.latitude)
+        //         this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} },()=>console.log(this.state.startPos));
+        //     }
+        // );
     }
 
 
@@ -418,7 +421,7 @@ class AssignTask extends Component {
         return path;
       }
 
-    // Decode Google DirectionResultObject in to latlng arrays
+
     decode(t, e) {
     for (var n, o, u = 0, l = 0, r = 0, d = [], h = 0, i = 0, a = null, c = Math.pow(10, e || 5); u < t.length;) {
         a = null, h = 0, i = 0;
@@ -474,20 +477,19 @@ class AssignTask extends Component {
         var CurrentSpeed = this.state.currSpeed.toFixed(1);
         var Calories = this.state.Calories.toFixed(1);
         var prograss = distance / totalDistance;
-
-        var FoodImage = water;
-        if (Calories > 4)
-            FoodImage = salad;
-        if (Calories > 15)
-            FoodImage = mushroom;
-        if (Calories > 53)
-            FoodImage = strawberry;
+        var FoodImage = Food1;
+        if (Calories > 200)
+            FoodImage = Food2;
+        if (Calories > 500)
+            FoodImage = Food3;
+        if (Calories > 1000)
+            FoodImage = Food4;
 
         
-        // var length = this.state.selectedLengthOption;
-        // var route = this.state.selectedRouteOption;
-        // var points = this.getPoints(this.state.startPos, length, route);
-        // this.generateRoute(points);
+        var length = this.state.selectedLengthOption;
+        var route = this.state.selectedRouteOption;
+        var points = this.getPoints(this.state.startPos, length, route);
+        this.generateRoute(points);
 
         // Circular progress bar data
         const α = interpolate(prograss, {
@@ -500,11 +502,6 @@ class AssignTask extends Component {
             this.setState({
                 selectedLengthOption,
             });
-
-            var length = this.state.selectedLengthOption;
-            var route = this.state.selectedRouteOption;
-            var points = this.getPoints(this.state.startPos, length, route);
-            this.generateRoute(points);
         }
 
         function renderLengthOption(option, selected, onSelect, index) {
@@ -531,11 +528,6 @@ class AssignTask extends Component {
             this.setState({
                 selectedRouteOption,
             });
-
-            var length = this.state.selectedLengthOption;
-            var route = this.state.selectedRouteOption;
-            var points = this.getPoints(this.state.startPos, length, route);
-            this.generateRoute(points);
         }
 
         function renderRouteOption(option, selected, onSelect, index) {
@@ -572,15 +564,13 @@ class AssignTask extends Component {
                     showsUserLocation={true}
                     style={{ flex: 2 }}
                     followsUserLocation={true}
-                    region={{
-                        latitude: this.state.startPos.lat,
-                        longitude: this.state.startPos.lng,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                      }}
+                    //region={this.getMapRegion()}
                 >
-                <Polyline coordinates={this.state.path} strokeWidth={5} strokeColor="#5DA6FE"/>                
-                <MapView.Marker coordinate={this.state.path[0]} />
+                <Polyline coordinates={this.state.path} strokeWidth={5} strokeColor="#5DA6FE"/>
+                <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
+                
+                <MapView.Marker coordinate={origin} />
+                <MapView.Marker coordinate={destination} />
                 </MapView>
 
                 <View style={{
@@ -614,9 +604,8 @@ class AssignTask extends Component {
                         flexDirection: 'row',
                         alignItems: 'center',
                     }}>
-                    <FontAwesome name="close" size={34} color="#2A2E43" />
-                    {/* <MaterialIcons name="pause" size={24} color="red" /> */}
-                    {/* <Text style={styles.textPause}>Pause</Text> */}
+                    <MaterialIcons name="pause" size={24} color="red" />
+                    <Text style={styles.textPause}>Pause</Text>
                 </TouchableOpacity>
 
                 <View style={styles.menu} {...this._panResponder.panHandlers}
@@ -659,9 +648,8 @@ class AssignTask extends Component {
                                 })}
                             />
                             <View style={{ alignItems: "center" }}>
-                                <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton}>
+                                <TouchableOpacity onPress={this.startButton.bind(this)} style={this.state.startPressed ? styles.StartButtonPress : styles.StartButton}>
                                     <Text style={styles.text2}>Start</Text>
-                                   
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -715,7 +703,7 @@ class AssignTask extends Component {
                                     </View>
                                 </View>
                             </View>
-                            <View style={{ alignItems: "center",marginTop:10}}>
+                            <View style={{ alignItems: "center" }}>
                                 {
                                 this.state.button ? 
                                     <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
@@ -723,13 +711,7 @@ class AssignTask extends Component {
                                     </TouchableOpacity>                                    
                                     :           
                                     <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
-                                        {/* <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Start </Text> */}
                                         <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Start </Text>
-                                        <ActivityIndicator 
-                                            style={this.state.loading ?  styles.text2 : {display:'none'}}
-                                            size="large" 
-                                            color="white" 
-                                        />
                                     </TouchableOpacity>              
                                 }
                                 </View>
@@ -803,11 +785,11 @@ class AssignTask extends Component {
 const w = Dimensions.get('window').width;
 const h = Dimensions.get('window').height;
 // const menuShowHeight = h * 0.35;
-const menuHideHeight = 85;
+const menuHideHeight = 80;
 // const buttonHeight = h * 0.05;
 // const routeButtonWidth = w * (1-0.15) / 2;
 // const menuHideHeight = 30;
-const menuShowHeight = 330;
+const menuShowHeight = 300;
 const buttonHeight = 45;
 const routeButtonWidth = w * (1 - 0.15) / 2;
 
