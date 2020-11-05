@@ -56,7 +56,9 @@ class FreeTraining extends Component {
             paused: false,
             button: false,
             currentPosition : 0,
+            initPosition: 0,
             loading: false,
+            // startPos: {latitude: 35.72807531139474, longitude: 139.7671613636778},
         };
         this._panResponder = {};
         this._previousHeight = menuShowHeight;
@@ -64,6 +66,15 @@ class FreeTraining extends Component {
         // this.menu = (null : ?{ setNativeProps(props) });
         this.show = true;
         
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                this.setState( {initPosition: {latitude: position.coords.latitude, longitude: position.coords.longitude} },()=>{
+                    //update map here
+                    //console.log(this.state.startPos)
+                });
+            }
+        );
+
     }
 
         //获取ID
@@ -290,22 +301,38 @@ class FreeTraining extends Component {
     coordDistance = (position) => {
         return haversine(this.state.previousPosition, position, { unit: 'mile' }) || 0;
     }
-    backButton() {
+    backButton1() {
         Alert.alert(
-            "Pause",
+            "Finish?",
             "",
             [
                 {
-                    text: "Terminate",
-
+                    text: "Finish",
+                    onPress: () => {
+                        this.backButton2();
+                    }
+                },
+                {
+                    text: "Continue",
+                    style: "cancel"
+                }
+            ],
+            { cancelable: false })
+    }
+    backButton2() {
+        Alert.alert(
+            "Keep Record?",
+            "",
+            [
+                {
+                    text: "Yes",
                     onPress: () => {
                         this.uploadRunningRecord(); 
                         this.navigation.navigate('MainMenuPage');}
                 },
                 {
-                    text: "Continue",
-                    onPress: () => console.log("Continue Pressed"),
-                    style: "cancel"
+                    text: "No",
+                    onPress: () => this.navigation.navigate('MainMenuPage')
                 }
             ],
             { cancelable: false })
@@ -354,6 +381,7 @@ class FreeTraining extends Component {
             FoodImage = mushroom;
         if (Calories > 53)
             FoodImage = strawberry;
+            console.log("test render")
 
 //
         return (
@@ -363,12 +391,17 @@ class FreeTraining extends Component {
                     showsUserLocation={true}
                     style={{ flex: 2 }}
                     followsUserLocation={true}
-                    //region={this.getMapRegion()}
+                    region={{
+                        latitude: this.state.initPosition.latitude,
+                        longitude: this.state.initPosition.longitude,
+                        latitudeDelta: 0.01,
+                        longitudeDelta: 0.01,
+                      }}
                 >
                 <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
                 </MapView>
 
-                <Svg onPress={this.backButton.bind(this)} style={styles.backButton} width={21.213} height={21.213} viewBox="0 0 21.213 21.213" {...props}>
+                <Svg onPress={this.backButton1.bind(this)} style={styles.backButton} width={21.213} height={21.213} viewBox="0 0 21.213 21.213" {...props}>
                     <G data-name="Group 2420" fill="#000000">
                         <Path
                             data-name="Rectangle 2287"

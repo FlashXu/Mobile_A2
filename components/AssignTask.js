@@ -199,7 +199,8 @@ class AssignTask extends Component {
                 position => {
 
                     var currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude} ;
-                    this.state.currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude}
+                    this.setState({ currentPosition: currentPosition})
+                    // this.state.currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude}
                     this.setState({ coordinates: this.state.coordinates.concat([currentPosition]) })
  
                     this.setState({ distance: this.state.distance + (this.coordDistance(currentPosition))* 1.609 })
@@ -573,8 +574,8 @@ class AssignTask extends Component {
                     style={{ flex: 2 }}
                     followsUserLocation={true}
                     region={{
-                        latitude: this.state.startPos.lat,
-                        longitude: this.state.startPos.lng,
+                        latitude: this.state.currentPosition.latitude,
+                        longitude: this.state.currentPosition.longitude,
                         latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
                       }}

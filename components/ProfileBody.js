@@ -169,15 +169,17 @@ class ProfileBody extends Component {
     }
 
     popUpMap(value) {
-      //alert("Map for " + value.id)
-      <MapView
-        style={styles.map}
-        showsUserLocation={true}
-        style={{ flex: 2 }}
-        followsUserLocation={true}
-      //region={this.getMapRegion()}
-      >
-    </MapView>
+      alert("Map for " + value.id);
+      this.setState({postSessionEditor:true});
+
+        <MapView
+          style={styles.map}
+          showsUserLocation={true}
+          style={{ flex: 2 }}
+          followsUserLocation={true}
+        //region={this.getMapRegion()}
+        >
+      </MapView>
     }
 
     // // 图片存至本机相册
