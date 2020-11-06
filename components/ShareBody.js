@@ -72,8 +72,32 @@ class ShareBody extends Component {
       this.componentDidMount();
   }
 
+  async get_attachments(db_name, mount_id, attachment_name){
+    var url = 'http://www.mobileappproj.ml:5000/attachments/' + db_name + '/' + mount_id + '/' + attachment_name;
+    var file = await fetch(url, {
+      method: 'GET',
+    })
+    .then((response) => response.json())
+    .catch((error) => {
+      console.error(error);
+    });  
+    if (file==null){
+      alert(url);
+    }
+    return file;
+  }
+
   popUpMap(value) {
-    alert("Map for " + value.postId)
+    //alert("Map for " + value.postId);
+    this.get_attachments('running_record', value.id, 'coordinate.json').then((res) => {
+      if(res == null){
+        alert('There is no coordinate data.');
+      }else if(res.hasOwnProperty('resp')){
+        alert('There is no coordinate data.');
+      }else{
+        alert(res.coordinate);
+      }
+    });
   }
  
   async GET(url){

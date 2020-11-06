@@ -18,10 +18,8 @@ class ProfileBody extends Component {
         var getDBdata = this.GET;
         var opDBdata = this.bodyOperation;
         var storeinfo = this.storeData;
+        var getAttach = this.get_attachments;
         var pageObj = this;
-
-          
-        
         // var downloadImg = this.downloadPhoto;
         
         // 获取personal info并保存
@@ -80,7 +78,6 @@ class ProfileBody extends Component {
                   var user_daily_distance = distance_list[0].daily_distance;
 
 
-
                   pageObj.setState({
                     completed_sessions:user_completed_sessions,
                     totalSessions:user_total_sessions,
@@ -95,6 +92,17 @@ class ProfileBody extends Component {
             })
           }}, storeinfo, getDBdata, pageObj);
 
+            // this.get_attachments('running_record',id,'coordinate.json')
+            // .then((res) => {
+            //   if(res.hasOwnProperty('resp')){
+            //     // 有resp 说明返回resp=404
+            //     alert('There is no such a file!');
+            //   }else{
+            //     // 成功返回坐标
+            //     alert(JSON.stringify(res))
+            //   }
+            // })
+
         // 获取running record并保存
         this.getID().then(function(id){
           if(id!=null){
@@ -108,7 +116,7 @@ class ProfileBody extends Component {
                 alert('There is no running records!');
               }else{
                 var record_list = res.record_detail;
-
+                //console.log("here in pageobj")
                 if(record_list.length > 0){
                   // Set ave speed to be the latest ave. speed.
                   pageObj.setState({avgSpeed: record_list[0].ave_speed});
@@ -117,6 +125,19 @@ class ProfileBody extends Component {
                   var user_running_records = [];
                   for(let i = 0; i < record_list.length; i++){
                     var running_record_item = record_list[i];
+                   // console.log("here in loop"+record_list[i]._id)
+                    getAttach('running_record', record_list[i]._id, 'coordinate.json')
+                        .then((res) => {
+                          if(res.hasOwnProperty('resp')){
+                            // 有resp 说明返回resp=404
+                            console.log('There is no such a file!');
+                          }else{
+                            // 成功返回坐标
+                            //console.log("res:"+res)
+                            coordinates_i=JSON.stringify(res);
+                          }
+                        })
+                    //console.log(coordinates_i)
                     var record_structure = {
                       id: record_list[i]._id,
                       totalDistance:record_list[i].distance,
@@ -135,7 +156,7 @@ class ProfileBody extends Component {
                 }
               }
             })
-          }}, storeinfo, opDBdata, pageObj);
+          }}, storeinfo, opDBdata, pageObj,getAttach);
         
         
         
@@ -146,33 +167,20 @@ class ProfileBody extends Component {
           totalSessions:0,
           trainingSessions:[
             {id:'None', totalDistance:'None',avgSpeed:'None',dateOfCompletion:'None',mapImage:require('../assets/map1.png')}
-          ],
-          coordinates :[],
-          MapOn :false
+          ]
         }
     }
 
     popUpMap(value) {
-      
-      
       //alert("Map for " + value.id)
-      this.get_attachments('running_record', value.id, 'coordinate.json').then((res) => {
-        if(res == null){
-          alert('There is no coordinate data.');
-        }else if(res.hasOwnProperty('resp')){
-          alert('There is no coordinate data.');
-        }else{
-          for(i=0;i<res.coordinate.length;i++){
-            var currentPosition = {latitude:res.coordinate[i][1],longitude:res.coordinate[i][0]} ;
-            this.setState({coordinates: this.state.coordinates.concat([currentPosition])})
-          }
-          this.setState({MapOn:true})
-        }
-      });
-      
-
-      
-
+      <MapView
+        style={styles.map}
+        showsUserLocation={true}
+        style={{ flex: 2 }}
+        followsUserLocation={true}
+      //region={this.getMapRegion()}
+      >
+    </MapView>
     }
 
     // // 图片存至本机相册
@@ -295,13 +303,9 @@ class ProfileBody extends Component {
       .then((response) => response.json())
       .catch((error) => {
         console.error(error);
-      });  
-      if (file==null){
-        alert(url);
-      }
+      });
       return file;
     }
-
     async removeProfile(){
       try {
            // Update online info.
@@ -363,14 +367,12 @@ class ProfileBody extends Component {
       let context = props.context;
       let trainingSessions = []
       let postId = props.postId;
-      let coordinates = []
       
       if (postId) {
         trainingSessions = context.state.trainingSessions.filter( (e) => {return (e.id===postId);});
       } else {
         trainingSessions = context.state.trainingSessions;
       }
-      
 
 
       return (
@@ -389,16 +391,10 @@ class ProfileBody extends Component {
                       <TouchableOpacity onPress={()=>context.popUpMap(value)} style={{flex:1, alignItems:"center"}}>
                         <Image  source={trainingSessions[i].mapImage} style={styles.image} />
                       </TouchableOpacity>
-                      
-                     
                     </TouchableOpacity>
-                    
               );
             })
-            
           }
-
-
         </View>
       )
     }
@@ -427,7 +423,7 @@ class ProfileBody extends Component {
 
                   <View style={{flex:2,alignItems:"flex-end"}}>
                     <Text style={styles.subtitle1}>Total Distance</Text>
-                    <Text style={styles.subtitle2}>{this.state.totalDistance.toFixed(2)} Km</Text>
+                    <Text style={styles.subtitle2}>{this.state.totalDistance} Km</Text>
                   </View>
               </View>
 
@@ -478,17 +474,7 @@ class ProfileBody extends Component {
 
               
             <View style={styles.centeredView}>
-            <MapView
-                    style={styles.map}
-                    showsUserLocation={true}
-
-                    followsUserLocation={true}
-                    //region={this.getMapRegion()}
-                >
-                <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
-                </MapView>
               <View style={styles.modalView}>
-              
                 <View style={styles.topBar}>
                   <Text style={styles.text2}>
                     Share with friends
@@ -500,9 +486,8 @@ class ProfileBody extends Component {
 
 
                 <this.RenderSessions context = {this} postId={this.state.currentSessionId} />
-                
+
                 <View style={{alignItems:'flex-start'}}  >
-                
                   <Textarea
                     containerStyle={styles.textareaContainer}
                     style={styles.textarea}
@@ -519,7 +504,6 @@ class ProfileBody extends Component {
                       size="large" 
                       color="black" 
                   />
-                  
                 </View>
               </View>
             </View>
@@ -651,7 +635,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom:0.45*h,
+    marginBottom:0.15*h,
     marginTop:0.1*h
   },
   modalView: {
@@ -697,12 +681,8 @@ const styles = StyleSheet.create({
   },
   hide:{
     display:'none'
-  },
-  map: {
-    position: 'relative',
-    alignItems: "center",
-    height: 300,
-  },
+  }
+
 
 });
 
