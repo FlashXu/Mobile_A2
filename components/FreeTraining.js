@@ -138,26 +138,28 @@ class FreeTraining extends Component {
     
         // 上传json附件到db_name里的mount_id，并起名字为attachment_name
         async upload_attachments(db_name, mount_id, attachment_name){
-            var coordinate = this.state.coordinates;
-            //console.log("coor原始"+coordinate)
+            var coordinate_dict = this.state.coordinates;
+            if (coordinate_dict.length == 0){
+                return;
+            }
+            var coordinate = [];
+            for(let i = 0; i < coordinate_dict.length; i++){
+                coordinate.push([coordinate_dict[i].longitude, coordinate_dict[i].latitude]);
+            }
             var data = {'coordinate': coordinate}; // JSON obj
-            //将 JSON obj转化为blob上传blob
+            // //将 JSON obj转化为blob上传blob
             const str = JSON.stringify(data);
             //JSON解码 JSON.parse
-            //console.log("JSON后"+str)
-            const bytes = new encoding.TextEncoder().encode(str);
+            // const bytes = new encoding.TextEncoder().encode(str);
             //const t = new encoding.TextDecoder().decode(bytes);
             //decode 解码
-            const blob = new Blob([bytes], {
-                type: "application/json;charset=utf-8"
-            });
-            console.log("blob"+blob)
+            const blob = new Blob([str], {type: "application/json;"});
             var url = 'http://www.mobileappproj.ml:5000/attachments/' + db_name + '/' + mount_id + '/' + attachment_name;
             var resp = await fetch(url, {
             method: 'PUT',
             body: blob
             })
-            .then((response) => alert(JSON.stringify(response.json())))
+            .then((response) => response.json())
             .catch((error) => {
             console.error(error);
             });
@@ -450,11 +452,11 @@ class FreeTraining extends Component {
                                 {
                                 this.state.button ? 
                                     <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
-                                         <Text style={ styles.text2}> Pause </Text>
+                                         <Text style={ styles.text2}> Start </Text>
                                     </TouchableOpacity>                                    
                                     :           
                                     <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
-                                        <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Start </Text>
+                                        <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Pause </Text>
                                         <ActivityIndicator 
                                             style={this.state.loading ?  styles.text2 : {display:'none'}}
                                             size="large" 
