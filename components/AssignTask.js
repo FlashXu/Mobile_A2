@@ -13,7 +13,8 @@ import {
     TouchableOpacity,
     Text,
     Alert,
-    ActivityIndicator
+    ActivityIndicator,
+    Modal
 } from 'react-native';
 import Moment from 'moment';
 import { RadioButtons } from 'react-native-radio-buttons';
@@ -737,6 +738,59 @@ class AssignTask extends Component {
                         </View>
                     </View>
                 </View>
+
+
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={this.state.complete}
+            onRequestClose={() => {
+              this.setState({complete:false})
+            }}
+          >
+            
+            <TouchableOpacity 
+            style={styles.container} 
+            activeOpacity={1} 
+            onPress={() => this.setState({modalVisible:false})}
+          >
+          </TouchableOpacity>
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+
+                <View style={styles.topBar}>
+                  <Text style={styles.text7}>
+                    Training Complete!
+                  </Text>
+                  <Text style={styles.text7}>
+                    Congratulations!
+                  </Text>
+                  <TouchableOpacity style={styles.deleteIcon} onPress={() => {
+                      this.setState({complete: false, showCommentEditor:false});
+                      this.navigation.navigate('MainMenuPage');
+                
+                
+                }} >
+                    <FontAwesome name="close" size={24} color="black" />
+                  </TouchableOpacity>
+                </View>
+        
+               
+              </View>
+            </View>
+            <TouchableOpacity 
+            style={styles.container} 
+            activeOpacity={1} 
+            onPress={() => this.setState({modalVisible:false})}
+          >
+          </TouchableOpacity>
+
+
+
+          </Modal>
+
+
+
             </View>
 
         );
@@ -1043,7 +1097,59 @@ var styles = StyleSheet.create({
         // position: 'absolute',
         // left: 160,
         marginTop: h * 0.01
-    },
+    },text7: {
+        fontSize: 17,
+        fontFamily: 'Poppins_700Bold',
+        flex:1
+      },
+      centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom:98,
+        marginTop:25,
+      },
+      modalView: {
+        backgroundColor: "#EFF3FF",
+        borderRadius: 20,
+        padding: 5,
+        alignItems: 'flex-start',
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5
+      },
+      openButton: {
+        backgroundColor: "#F194FF",
+        borderRadius: 20,
+        padding: 10,
+        elevation: 2
+      },
+      textStyle: {
+        color: "white",
+        fontWeight: "bold",
+        textAlign: "center"
+      },
+      deleteIcon: {
+        width:100,
+        alignItems:'flex-end',
+        position:'relative',
+        flex:1
+      },
+      topBar:{
+        width:0.95*w,
+        // backgroundColor:'black'
+        flexDirection:'row',
+        justifyContent:'space-between',
+        alignItems:'center',
+        marginTop:10,
+        paddingHorizontal:10,
+        marginBottom:-10
+      },
 });
 
 export default AssignTask;
