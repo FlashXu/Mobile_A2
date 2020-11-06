@@ -298,13 +298,8 @@ class FreeTraining extends Component {
                 {
                     text: "Finish",
                     onPress: () => {
-<<<<<<< HEAD
                         this.backButton2();
                     }
-=======
-                        this.uploadRunningRecord(); 
-                        this.navigation.navigate('MainMenuPage');}
->>>>>>> uptodate_frontend_pages
                 },
                 {
                     text: "Continue",

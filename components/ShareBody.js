@@ -5,6 +5,9 @@ import { FontAwesome, MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScrollView } from 'react-native-gesture-handler';
 import Textarea from 'react-native-textarea';
 import Moment from 'moment';
+import MapView, { 
+  Polyline,
+} from "react-native-maps";
 
 
 class ShareBody extends Component {
@@ -27,6 +30,9 @@ class ShareBody extends Component {
         //Request User Info from server
         userName:'',
         userProfileImg: require('../assets/man-user.png'),
+
+        showMap:false,
+        coordinates:[],
 
         //Request All Posts created by the friend of this user from server
         trainingSessions:[]
@@ -89,6 +95,10 @@ class ShareBody extends Component {
 
   popUpMap(value) {
     //alert("Map for " + value.postId);
+    this.setState({showMap:true},()=>console.log(this.state.showMap));
+
+    
+
     this.get_attachments('running_record', value.id, 'coordinate.json').then((res) => {
       if(res == null){
         alert('There is no coordinate data.');
@@ -488,6 +498,40 @@ class ShareBody extends Component {
           </TouchableOpacity>
             
           </Modal>
+
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={this.state.showMap}
+            onRequestClose={() => {
+              this.setState({showMap:false})
+            }}
+          >
+            
+            <MapView
+                style={styles.map}
+                showsUserLocation={true}
+
+                followsUserLocation={true}
+                //region={this.getMapRegion()}
+            >
+            <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
+            </MapView>
+
+
+            <TouchableOpacity 
+              style={styles.exitZoom} 
+              activeOpacity={1} 
+              onPress={() => this.setState({showMap:false})}
+            >
+            </TouchableOpacity>
+
+
+
+          </Modal>
+
+
       </View> 
     );
   }
@@ -674,6 +718,14 @@ const styles = StyleSheet.create({
     position:'absolute',
     bottom:5,
     left:5
+  },
+  map: {
+    position: 'relative',
+    alignItems: "center",
+    height: 300,
+  },
+  exitZoom: {
+    height:0.6 * h
   }
   
 

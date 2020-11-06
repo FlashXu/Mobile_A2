@@ -148,27 +148,15 @@ class ProfileBody extends Component {
             {id:'None', totalDistance:'None',avgSpeed:'None',dateOfCompletion:'None',mapImage:require('../assets/map1.png')}
           ],
           coordinates :[],
-          MapOn :false
+          showMap :false
         }
     }
 
     popUpMap(value) {
-<<<<<<< HEAD
-      alert("Map for " + value.id);
-      this.setState({postSessionEditor:true});
 
-        <MapView
-          style={styles.map}
-          showsUserLocation={true}
-          style={{ flex: 2 }}
-          followsUserLocation={true}
-        //region={this.getMapRegion()}
-        >
-      </MapView>
-=======
+      // alert("Map for " + value.id);
+      this.setState({showMap:true})
       
-      
-      //alert("Map for " + value.id)
       this.get_attachments('running_record', value.id, 'coordinate.json').then((res) => {
         if(res == null){
           alert('There is no coordinate data.');
@@ -179,14 +167,10 @@ class ProfileBody extends Component {
             var currentPosition = {latitude:res.coordinate[i][1],longitude:res.coordinate[i][0]} ;
             this.setState({coordinates: this.state.coordinates.concat([currentPosition])})
           }
-          this.setState({MapOn:true})
+          
         }
       });
       
-
-      
-
->>>>>>> uptodate_frontend_pages
     }
 
     // // 图片存至本机相册
@@ -245,7 +229,9 @@ class ProfileBody extends Component {
             "contents":pageObj.state.newPostContent
           });
           var url = 'http://www.mobileappproj.ml:5000/moments';
-          opDBdata(url, data, 'POST').then((res) => alert('Having successfully sent the moment.'));
+          opDBdata(url, data, 'POST').then((res) => {
+            this.setState({postSessionEditor:false,currentSessionId:'',newPostContent:'',sendingRequest:false});
+            alert('Having successfully sent the moment.')});
         }
       }, opDBdata, current_time, pageObj);
 
@@ -254,9 +240,9 @@ class ProfileBody extends Component {
       
 
       //模拟两秒延迟
-      setTimeout(()=>{
-        this.setState({postSessionEditor:false,currentSessionId:'',newPostContent:'',sendingRequest:false});
-      },2000)
+      // setTimeout(()=>{
+      //   this.setState({postSessionEditor:false,currentSessionId:'',newPostContent:'',sendingRequest:false});
+      // },2000)
 
     }
   
@@ -492,7 +478,8 @@ class ProfileBody extends Component {
 
               
             <View style={styles.centeredView}>
-            <MapView
+
+            {/* <MapView
                     style={styles.map}
                     showsUserLocation={true}
 
@@ -500,7 +487,8 @@ class ProfileBody extends Component {
                     //region={this.getMapRegion()}
                 >
                 <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
-                </MapView>
+                </MapView> */}
+
               <View style={styles.modalView}>
               
                 <View style={styles.topBar}>
@@ -551,6 +539,39 @@ class ProfileBody extends Component {
             >
             </TouchableOpacity>
           </Modal>
+          
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={this.state.showMap}
+            onRequestClose={() => {
+              this.setState({showMap:false})
+            }}
+          >
+            <MapView
+                style={styles.map}
+                showsUserLocation={true}
+
+                followsUserLocation={true}
+                //region={this.getMapRegion()}
+            >
+            <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
+            </MapView>
+
+
+            <TouchableOpacity 
+              style={styles.exitZoom} 
+              activeOpacity={1} 
+              onPress={() => this.setState({showMap:false})}
+            >
+            </TouchableOpacity>
+
+
+
+          </Modal>
+
+          
 
         </View> 
       );
@@ -717,6 +738,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: 300,
   },
+  exitZoom: {
+    height:0.6 * h
+  }
 
 });
 
