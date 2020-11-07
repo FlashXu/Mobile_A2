@@ -2,6 +2,7 @@
 import React, { Component } from 'react';
 import { FontAwesome } from '@expo/vector-icons';
 import Svg, { G, Circle, Rect, Path, Marker } from 'react-native-svg';
+import smile from '../assets/smile.png';
 import {
     Dimensions,
     PanResponder,
@@ -12,8 +13,9 @@ import {
     TouchableWithoutFeedback,
     TouchableOpacity,
     Text,
-    Alert,
     ActivityIndicator,
+    Alert,
+    AsyncStorage,
     Modal
 } from 'react-native';
 import Moment from 'moment';
@@ -66,7 +68,8 @@ class AssignTask extends Component {
             paused: false,
             button: false,
             currentPosition : 0,
-            loading: false
+            loading: false,
+            complete: false
         };
 
 
@@ -74,13 +77,11 @@ class AssignTask extends Component {
             position => {
                 this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} },()=>{
                     //update map here
-
                     var length = this.state.selectedLengthOption;
                     var route = this.state.selectedRouteOption;
                     var points = this.getPoints(this.state.startPos, length, route);
                     this.generateRoute(points);
-
-                    //console.log(this.state.startPos)
+                    this.setState({startPosLoaded:true});
                 });
             }
         );
@@ -113,7 +114,8 @@ class AssignTask extends Component {
     }
     startButton() {
         //按键反馈
-        this.setState({ loading: true, displayStart: 'none', displayDetail: 'flex' });
+        this.setState({ startPressed: true, displayStart: 'none', displayDetail: 'flex' });
+        this.setState({ loading: true });
         var startTime = new Date().getTime();
         let date = new Date();
         if(!this.state.startRun & this.state.paused){
@@ -126,7 +128,6 @@ class AssignTask extends Component {
             this.setState({ test: "Tracking Run1" })
             this.setState({ button: true,  startRun: false, loading:false })
             this.state.startRun = false
-            //console.log("1 "+this.state.startRun)
             setTimeout(() => this.intervalID = setInterval(() => {
                 var diff = startTime - new Date().getTime();
                 var hr = Math.floor(-diff / 3600000)
@@ -200,8 +201,7 @@ class AssignTask extends Component {
                 position => {
 
                     var currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude} ;
-                    this.setState({ currentPosition: currentPosition})
-                    // this.state.currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude}
+                    this.state.currentPosition = {latitude:position.coords.latitude,longitude:position.coords.longitude}
                     this.setState({ coordinates: this.state.coordinates.concat([currentPosition]) })
  
                     this.setState({ distance: this.state.distance + (this.coordDistance(currentPosition))* 1.609 })
@@ -232,17 +232,22 @@ class AssignTask extends Component {
     coordDistance = (position) => {
         return haversine(this.state.previousPosition, position, { unit: 'mile' }) || 0;
     }
+
+
+
     backButton() {
         if (this.state.displayStart == 'flex')
             this.navigation.goBack();
         else {
             Alert.alert(
-                "Exit?",
+                "Pause",
                 "",
                 [
                     {
                         text: "Terminate",
-                        onPress: () => this.navigation.navigate('MainMenuPage')
+                        onPress: () => {
+                            this.navigation.navigate('MainMenuPage');
+                        }
                     },
                     {
                         text: "Continue",
@@ -254,7 +259,22 @@ class AssignTask extends Component {
         }
     }
 
-    componentWillMount() {
+    //上传用的网络连接方法
+    async bodyOperation(url, data, operation){
+        var data = await fetch(url,{
+        method: operation,
+        body: data
+        })
+        .then((response) =>response.json())
+        .catch((error) => {
+            console.error(error);
+        });
+        return data;
+    }
+
+    componentDidMount() {
+        setTimeout(() => this.setState({ complete: true, paused:true, button:false }), 120000);
+
         clearInterval(this.intervalId, this.intervalTrackingID);
         this._panResponder = PanResponder.create({
             onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
@@ -273,9 +293,84 @@ class AssignTask extends Component {
 
     }
 
-    componentDidMount() {
-        // this._updateNativeStyles();
+    //绑在按钮上的方法
+    uploadRunningRecord = () => {
+        let date = new Date();
+        var current_time = Moment(date).format('YYYY-MM-DD HH:mm:ss');
+        var pageObj = this;
+        var opDBdata = this.bodyOperation;
+        this.getID().then((id) => {
+            if(id!=null){
+                var url = 'http://www.mobileappproj.ml:5000/running_record';
+                var data = JSON.stringify({
+                    "distance": pageObj.state.distance.toFixed(2), // 总距离
+                    "end_time":  current_time, // 结束时间
+                    "start_time": pageObj.state.startTime, // 开始时间
+                    "ave_speed": pageObj.state.speed.toFixed(2), // 平均速度
+                    "user_id": id, // 用户id
+                    "status": 'completed'// 完成情况
+                    //附件的generated id？
+                  });
+                  //这里应该再保存每次跑完步的记录ID
+                opDBdata(url, data, 'POST').then((res) => {
+                    if(res.resp == 406){
+                      alert('Record is already existed!');
+                    }else{
+                        //此处调用上传附件的方法，上传对应running_record的系列坐标
+                        //alert('success');
+                        pageObj.upload_attachments('running_record',res.gen_id,'coordinate.json');
+                        //alert('Success! The generated id is: ' + res.gen_id);
+                    }
+                  });
+              
+            }
+
+        }, current_time, pageObj, opDBdata);
     }
+
+    // 上传json附件到db_name里的mount_id，并起名字为attachment_name
+    async upload_attachments(db_name, mount_id, attachment_name){
+        var coordinate_dict = this.state.coordinates;
+        if (coordinate_dict.length == 0){
+            return;
+        }
+        var coordinate = [];
+        for(let i = 0; i < coordinate_dict.length; i++){
+            coordinate.push([coordinate_dict[i].longitude, coordinate_dict[i].latitude]);
+        }
+        var data = {'coordinate': coordinate}; // JSON obj
+        // //将 JSON obj转化为blob上传blob
+        const str = JSON.stringify(data);
+        //JSON解码 JSON.parse
+        // const bytes = new encoding.TextEncoder().encode(str);
+        //const t = new encoding.TextDecoder().decode(bytes);
+        //decode 解码
+        const blob = new Blob([str], {type: "application/json;"});
+        var url = 'http://www.mobileappproj.ml:5000/attachments/' + db_name + '/' + mount_id + '/' + attachment_name;
+        var resp = await fetch(url, {
+        method: 'PUT',
+        body: blob
+        })
+        .then((response) => response.json())
+        .catch((error) => {
+        console.error(error);
+        });
+        return resp;
+    }
+
+
+    async getID(){
+        try {
+            id = await AsyncStorage.getItem('@accountID');
+            return id;
+        }catch (e) {
+            console.error(e);
+            return null;
+        }
+    }
+
+
+
 
 
 
@@ -288,8 +383,7 @@ class AssignTask extends Component {
         
 
         var url = 'https://roads.googleapis.com/v1/nearestRoads?points=' + pathValues.join("|") + '&key=' + google_api; 
-        // console.log(url);
-        // this.GET(url).then((res) => console.log(JSON.stringify(res)));
+        
         this.GET(url).then((res) => this.processNearestRoadsResponse(res));
         
     }
@@ -298,7 +392,7 @@ class AssignTask extends Component {
         var placeIdArray = [];
         var wayPointsArray = [];
         let indexCount = 0;
-        
+
         for (let i = 0; i < data.snappedPoints.length; i++) {
             let originalIndex = data.snappedPoints[i].originalIndex;
             if (originalIndex == indexCount) {
@@ -317,7 +411,7 @@ class AssignTask extends Component {
         var mode = 'WALKING';
 
         var url = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + origin + '&destination=' + destination + '&mode=' + mode + '&waypoints=' + waypoints + '&key=' + google_api;
-        // this.GET(url).then((res) => console.log(JSON.stringify(res)));
+       
 
         this.GET(url).then((res) => this.decodingLine(res));
         
@@ -325,9 +419,7 @@ class AssignTask extends Component {
 
     decodingLine(line){
         var overview = line.routes[0].overview_polyline.points;
-        // console.log(overview);
         var directs = this.decode(overview);
-        // console.log(directs);
         this.setState({path: directs})
     }
 
@@ -455,7 +547,6 @@ class AssignTask extends Component {
         // get the route
         var route = this.state.selectedRouteOption;
         // Print
-        //console.log("rendering page");
 
         const lengthOptions = [
             "Short",
@@ -476,7 +567,7 @@ class AssignTask extends Component {
         var CurrentSpeed = this.state.currSpeed.toFixed(1);
         var Calories = this.state.Calories.toFixed(1);
         var prograss = distance / totalDistance;
-
+        
         var FoodImage = water;
         if (Calories > 4)
             FoodImage = salad;
@@ -568,22 +659,44 @@ class AssignTask extends Component {
         }
 
         return (
-            <View style={{ flex: 1, backgroundColor: 'pink' }} >
-                <MapView
+            <View style={{ flex: 1, backgroundColor: '#aee1f5' }} >
+            {(() => {
+                if (this.state.startPosLoaded) {
+                    return <MapView
+                            style={styles.map}
+                            showsUserLocation={true}
+                            style={{ flex: 2 }}
+                            followsUserLocation={true}
+                            initialRegion={{
+                                latitude: this.state.startPos.lat,
+                                longitude: this.state.startPos.lng,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
+                            }}
+                        >
+                        <Polyline coordinates={this.state.path} strokeWidth={5} strokeColor="#5DA6FE"/>       
+                        <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>              
+                        <MapView.Marker coordinate={this.state.path[0]} />
+                        </MapView>
+                } 
+            })()}
+
+                {/* <MapView
                     style={styles.map}
                     showsUserLocation={true}
                     style={{ flex: 2 }}
-                    followsUserLocation={true}
-                    region={{
-                        latitude: this.state.currentPosition.latitude,
-                        longitude: this.state.currentPosition.longitude,
+                    //followsUserLocation={true}
+                    initialRegion={{
+                        latitude: this.state.startPos.lat,
+                        longitude: this.state.startPos.lng,
                         latitudeDelta: 0.01,
                         longitudeDelta: 0.01,
                       }}
                 >
-                <Polyline coordinates={this.state.path} strokeWidth={5} strokeColor="#5DA6FE"/>                
+                <Polyline coordinates={this.state.path} strokeWidth={5} strokeColor="#5DA6FE"/>       
+                <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>              
                 <MapView.Marker coordinate={this.state.path[0]} />
-                </MapView>
+                </MapView> */}
 
                 <View style={{
                     marginTop: h * 0.07,
@@ -617,8 +730,8 @@ class AssignTask extends Component {
                         alignItems: 'center',
                     }}>
                     <FontAwesome name="close" size={34} color="#2A2E43" />
-                    {/* <MaterialIcons name="pause" size={24} color="red" /> */}
-                    {/* <Text style={styles.textPause}>Pause</Text> */}
+                    {/* <MaterialIcons name="pause" size={24} color="red" />
+                    <Text style={styles.textPause}>Pause</Text> */}
                 </TouchableOpacity>
 
                 <View style={styles.menu} {...this._panResponder.panHandlers}
@@ -661,9 +774,8 @@ class AssignTask extends Component {
                                 })}
                             />
                             <View style={{ alignItems: "center" }}>
-                                <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton}>
+                                <TouchableOpacity onPress={this.startButton.bind(this)} style={this.state.startPressed ? styles.StartButtonPress : styles.StartButton}>
                                     <Text style={styles.text2}>Start</Text>
-                                   
                                 </TouchableOpacity>
                             </View>
                         </View>
@@ -717,7 +829,7 @@ class AssignTask extends Component {
                                     </View>
                                 </View>
                             </View>
-                            <View style={{ alignItems: "center",marginTop:10}}>
+                            <View style={{ alignItems: "center" }}>
                                 {
                                 this.state.button ? 
                                     <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
@@ -732,6 +844,7 @@ class AssignTask extends Component {
                                             size="large" 
                                             color="white" 
                                         />
+                                    
                                     </TouchableOpacity>              
                                 }
                                 </View>
@@ -740,54 +853,60 @@ class AssignTask extends Component {
                 </View>
 
 
-        <Modal
-            animationType="slide"
-            transparent={true}
-            visible={this.state.complete}
-            onRequestClose={() => {
-              this.setState({complete:false})
-            }}
-          >
-            
-            <TouchableOpacity 
-            style={styles.container} 
-            activeOpacity={1} 
-            onPress={() => this.setState({modalVisible:false})}
-          >
-          </TouchableOpacity>
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
+                <Modal
+                    animationType="slide"
+                    transparent={true}
+                    visible={this.state.complete}
+                    onRequestClose={() => {
+                        this.setState({ complete: false })
+                    }}
+                >
 
-                <View style={styles.topBar}>
-                  <Text style={styles.text7}>
-                    Training Complete!
-                  </Text>
-                  <Text style={styles.text7}>
-                    Congratulations!
-                  </Text>
-                  <TouchableOpacity style={styles.deleteIcon} onPress={() => {
-                      this.setState({complete: false, showCommentEditor:false});
-                      this.navigation.navigate('MainMenuPage');
-                
-                
-                }} >
-                    <FontAwesome name="close" size={24} color="black" />
-                  </TouchableOpacity>
-                </View>
-        
-               
-              </View>
-            </View>
-            <TouchableOpacity 
-            style={styles.container} 
-            activeOpacity={1} 
-            onPress={() => this.setState({modalVisible:false})}
-          >
-          </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.container}
+                        activeOpacity={1}
+                        onPress={() => this.setState({ complete: false })}
+                    >
+                    </TouchableOpacity>
+                    <View style={styles.centeredView}>
+                        <View style={styles.modalView}>
+
+                            <View style={styles.topBar}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={styles.text7}>
+                                        Training Complete
+                                </Text>
+                                    <TouchableOpacity style={styles.deleteIcon} onPress={() => {
+                                        this.setState({ complete: false, showCommentEditor: false });
+                                        this.uploadRunningRecord();
+                                        this.navigation.navigate('MainMenuPage');
+                                    }} >
+                                        <FontAwesome name="close" size={24} color="black" />
+                                    </TouchableOpacity>
+
+                                </View>
+                                
+                                <Image source={smile} style={styles.imageSmile} />
+                                <Text style={styles.text8}>
+                                    Well done!
+                                </Text>
+                                <Text style={styles.text9}>Total Distance Run: {distance} km</Text>
+                                <Text style={styles.text9}>Avg Speed: {AvgSpeed} m/s</Text>
+                               
+                                <View style={{ flexDirection: 'row',  alignSelf: 'flex-start' }}>
+                                    <Text style={styles.text9}>Calories: {Calories} kj</Text>
+                                    <Image source={FoodImage} style={styles.image} />
+                                </View>
+                            </View>
+
+
+                        </View>
+                    </View>
+
+                </Modal>
 
 
 
-          </Modal>
 
 
 
@@ -858,11 +977,11 @@ class AssignTask extends Component {
 const w = Dimensions.get('window').width;
 const h = Dimensions.get('window').height;
 // const menuShowHeight = h * 0.35;
-const menuHideHeight = 85;
+const menuHideHeight = 80;
 // const buttonHeight = h * 0.05;
 // const routeButtonWidth = w * (1-0.15) / 2;
 // const menuHideHeight = 30;
-const menuShowHeight = 330;
+const menuShowHeight = 300;
 const buttonHeight = 45;
 const routeButtonWidth = w * (1 - 0.15) / 2;
 
@@ -1097,59 +1216,90 @@ var styles = StyleSheet.create({
         // position: 'absolute',
         // left: 160,
         marginTop: h * 0.01
-    },text7: {
-        fontSize: 17,
-        fontFamily: 'Poppins_700Bold',
-        flex:1
-      },
-      centeredView: {
+    },
+    centeredView: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-        marginBottom:98,
-        marginTop:25,
-      },
-      modalView: {
+        marginBottom: 98,
+        marginTop: 25,
+    },
+    modalView: {
         backgroundColor: "#EFF3FF",
         borderRadius: 20,
         padding: 5,
-        alignItems: 'flex-start',
+        //alignItems: 'flex-start',
         shadowColor: "#000",
         shadowOffset: {
-          width: 0,
-          height: 2
+            width: 0,
+            height: 2
         },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
         elevation: 5
-      },
-      openButton: {
+    },
+    openButton: {
         backgroundColor: "#F194FF",
         borderRadius: 20,
         padding: 10,
         elevation: 2
-      },
-      textStyle: {
+    },
+    textStyle: {
         color: "white",
         fontWeight: "bold",
         textAlign: "center"
-      },
-      deleteIcon: {
-        width:100,
-        alignItems:'flex-end',
-        position:'relative',
-        flex:1
-      },
-      topBar:{
-        width:0.95*w,
+    },
+    deleteIcon: {
+
+        //alignSelf: 'flex-end',
+        position: 'relative',
+        left: 50,
+        //flex: 1
+    },
+    topBar: {
+        width: 0.95 * w,
+        height: h* 0.35,
         // backgroundColor:'black'
-        flexDirection:'row',
-        justifyContent:'space-between',
-        alignItems:'center',
-        marginTop:10,
-        paddingHorizontal:10,
-        marginBottom:-10
-      },
+        alignItems: 'center',
+        marginTop: 10,
+        paddingHorizontal: 10,
+        marginBottom: -10
+    }, 
+    image: {
+        width: w * 0.1,
+        height: w * 0.1,
+        resizeMode: 'contain',
+        // position: 'absolute',
+        // left: 160,
+        marginTop: h * 0.01
+    },
+    imageSmile: {
+        width: w * 0.2,
+        height: w * 0.2,
+        resizeMode: 'contain',
+        marginTop: 10,
+    },
+    text7: {
+        fontSize: 20,
+        fontFamily: 'Poppins_700Bold',
+    },
+    text8: {
+        fontSize: 25,
+        fontFamily: 'Poppins_700Bold',
+        color: '#F8AC1B',
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    text9: {
+        fontSize: 20,
+        fontFamily: 'Poppins_700Bold',
+        color: '#474BD9',
+        marginTop: 10,
+        alignSelf: 'flex-start'
+    },
+
+
+
 });
 
 export default AssignTask;

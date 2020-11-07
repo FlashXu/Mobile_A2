@@ -36,44 +36,7 @@ class ShareBody extends Component {
 
         //Request All Posts created by the friend of this user from server
         trainingSessions:[]
-        // trainingSessions: [
-        //   { postId:'123',
-        //     dateOfPost:'25/10',
-        //     userName:'Minghui',
-        //     content:'This is my favourate route.',
-        //     thumbUp:true,
-        //     thumbUps:23, 
-        //     mapImage:require('../assets/map1.png'),
-        //     comments:[{date:'25/10',name:'Minghui',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Jiawei',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Yichao',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Minghui',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Jiawei',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Yichao',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')}]
-        //   },
-        //   { postId:'1234',
-        //     dateOfPost:'25/10',
-        //     userName:'Jiawei',
-        //     content:'This is my favourate route.',
-        //     thumbUp:false,
-        //     thumbUps:23, 
-        //     mapImage:require('../assets/map1.png'),
-        //     comments:[{date:'25/10',name:'Minghui',content:'I like this, very nice1!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Jiawei',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Yichao',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')}]
-        //   },
-        //   { postId:'12345',
-        //     dateOfPost:'25/10',
-        //     userName:'Yangye',
-        //     content:'This is my favourate route.',
-        //     thumbUp:true,
-        //     thumbUps:23, 
-        //     mapImage:require('../assets/map1.png'),
-        //     comments:[{date:'25/10',name:'Yizi',content:'I like this, very nice2!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Jiawei',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Yichao',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')}]
-        //   },
-        //   { postId:'123456',
-        //     dateOfPost:'25/10',
-        //     userName:'Ruocheng',
-        //     content:'This is my favourate route.',
-        //     thumbUp:false,
-        //     thumbUps:23, 
-        //     mapImage:require('../assets/map1.png'),
-        //     comments:[{date:'25/10',name:'Yizi',content:'I like this, very nice3!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Jiawei',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')},{date:'25/10',name:'Yichao',content:'I like this, very nice!',profileImg:require('../assets/man-user.png')}]
-        //   },
-        // ]
+        
       } 
       this.componentDidMount();
   }
@@ -94,20 +57,25 @@ class ShareBody extends Component {
   }
 
   popUpMap(value) {
-    //alert("Map for " + value.postId);
-    this.setState({showMap:true},()=>console.log(this.state.showMap));
 
+    this.setState({loadingMap:true})
     
-
-    this.get_attachments('running_record', value.id, 'coordinate.json').then((res) => {
+    this.get_attachments('running_record', value.recordId, 'coordinate.json').then((res) => {
       if(res == null){
         alert('There is no coordinate data.');
+        this.setState({loadingMap:false});
       }else if(res.hasOwnProperty('resp')){
         alert('There is no coordinate data.');
+        this.setState({loadingMap:false});
       }else{
-        alert(res.coordinate);
+        for(i=0;i<res.coordinate.length;i++){
+          var currentPosition = {latitude:res.coordinate[i][1],longitude:res.coordinate[i][0]} ;
+          this.setState({coordinates: this.state.coordinates.concat([currentPosition])})
+        }
+        this.setState({coordinatesLoaded: true,showMap:true,loadingMap:false});
       }
     });
+    
   }
  
   async GET(url){
@@ -180,6 +148,10 @@ class ShareBody extends Component {
             info_dict.dateOfPost = moment.time;
             info_dict.userName = moment.first_name + ' ' + moment.last_name;
             info_dict.content = moment.contents;
+            info_dict.recordId = moment.bind_record_id;
+
+          
+
             var like_list =  moment.like_list;
             if(like_list.indexOf(id) != -1){
               info_dict.thumbUp = true;
@@ -426,6 +398,12 @@ class ShareBody extends Component {
           <Text style = {styles.title}>Share</Text>
 
           <ActivityIndicator 
+              style={this.state.loadingMap ?  styles.text2 : {display:'none'}}
+              size="large" 
+              color="white" 
+          />
+
+          <ActivityIndicator 
                       style={this.state.pageLoading ?  {display:'flex',marginTop:'20%'} : {display:'none',marginTop:'20%'}}
                       size="large" 
                       color="white" 
@@ -509,15 +487,38 @@ class ShareBody extends Component {
             }}
           >
             
-            <MapView
+            {/* <MapView
                 style={styles.map}
-                showsUserLocation={true}
-
-                followsUserLocation={true}
-                //region={this.getMapRegion()}
             >
             <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
-            </MapView>
+            </MapView> */}
+
+            {(() => {
+                if (this.state.coordinatesLoaded) {
+                    return <TouchableOpacity onPress={()=>this.setState({showMap:false})}>
+
+                        <MapView
+                        style={styles.map}
+                        region={{
+                            latitude: this.state.coordinates[0].latitude,
+                            longitude: this.state.coordinates[0].longitude,
+                            latitudeDelta: 0.005,
+                            longitudeDelta: 0.005,
+                            // latitudeDelta: Math.abs(this.state.coordinates[Math.floor((this.state.coordinates.length)/2)].latitude - this.state.coordinates[0].latitude) * 8,
+                            // longitudeDelta: Math.abs(this.state.coordinates[Math.floor((this.state.coordinates.length)/2)].longitude - this.state.coordinates[0].longitude) * 8,
+                          
+                        }}
+                        >
+                        <MapView.Marker coordinate={this.state.coordinates[0]} />
+                        <MapView.Marker coordinate={this.state.coordinates[this.state.coordinates.length-1]} />
+                        <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#474BD9"/>
+                        </MapView> 
+
+                    </TouchableOpacity>
+                  
+
+                } 
+            })()}
 
 
             <TouchableOpacity 

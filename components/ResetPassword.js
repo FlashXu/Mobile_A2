@@ -13,8 +13,6 @@ class ResetPassword extends Component {
         this.data = props.route.params;
         this.state = { resetPressed: false, passwordOne: '', passwordTwo: '', passwordImageStateOne: false, passwordImageStateTwo: false};
         
-        //to be removed
-        alert("your id is: " + this.data.userId)
     }
     passwordImagePressOne = () => {
         this.setState({

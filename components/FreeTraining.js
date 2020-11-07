@@ -56,25 +56,21 @@ class FreeTraining extends Component {
             paused: false,
             button: false,
             currentPosition : 0,
-            initPosition: 0,
             loading: false,
-            // startPos: {latitude: 35.72807531139474, longitude: 139.7671613636778},
+            startPos: {}
         };
         this._panResponder = {};
         this._previousHeight = menuShowHeight;
         this._menuStyles = {};
         // this.menu = (null : ?{ setNativeProps(props) });
         this.show = true;
-        
+
         navigator.geolocation.getCurrentPosition(
             position => {
-                this.setState( {initPosition: {latitude: position.coords.latitude, longitude: position.coords.longitude} },()=>{
-                    //update map here
-                    //console.log(this.state.startPos)
-                });
+                this.setState( {startPos: {lat: position.coords.latitude, lng: position.coords.longitude} }, ()=> {this.setState({startPosLoaded:true})});
             }
         );
-
+        
     }
 
         //获取ID
@@ -303,6 +299,8 @@ class FreeTraining extends Component {
     coordDistance = (position) => {
         return haversine(this.state.previousPosition, position, { unit: 'mile' }) || 0;
     }
+
+
     backButton1() {
         Alert.alert(
             "Finish?",
@@ -340,7 +338,7 @@ class FreeTraining extends Component {
             { cancelable: false })
     }
 
-    componentWillMount() {
+    componentDidMount() {
         clearInterval(this.intervalId, this.intervalTrackingID);
         this._panResponder = PanResponder.create({
             onStartShouldSetPanResponder: this._handleStartShouldSetPanResponder,
@@ -383,25 +381,36 @@ class FreeTraining extends Component {
             FoodImage = mushroom;
         if (Calories > 53)
             FoodImage = strawberry;
-            console.log("test render")
 
 //
         return (
-            <View style={{ flex: 1, backgroundColor: 'pink' }} >
-                <MapView
-                    style={styles.map}
-                    showsUserLocation={true}
-                    style={{ flex: 2 }}
-                    followsUserLocation={true}
-                    region={{
-                        latitude: this.state.initPosition.latitude,
-                        longitude: this.state.initPosition.longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                      }}
-                >
-                <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
-                </MapView>
+            <View style={{ flex: 1, backgroundColor: '#aee1f5' }} >
+
+                {(() => {
+                if (this.state.startPosLoaded) {
+                    return <MapView
+                        style={styles.map}
+                        showsUserLocation={true}
+                        style={{ flex: 2 }}
+                        followsUserLocation={true}
+                        initialRegion={{
+                            latitude: this.state.startPos.lat,
+                            longitude: this.state.startPos.lng,
+                            // latitude: 37.3,
+                            // longitude: -122,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
+                    >
+                    <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
+                    </MapView>
+            
+                } 
+                })()}
+
+
+
+
 
                 <Svg onPress={this.backButton1.bind(this)} style={styles.backButton} width={21.213} height={21.213} viewBox="0 0 21.213 21.213" {...props}>
                     <G data-name="Group 2420" fill="#000000">
@@ -452,11 +461,11 @@ class FreeTraining extends Component {
                                 {
                                 this.state.button ? 
                                     <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
-                                         <Text style={ styles.text2}> Start </Text>
+                                         <Text style={ styles.text2}> Pause </Text>
                                     </TouchableOpacity>                                    
                                     :           
                                     <TouchableOpacity onPress={this.startButton.bind(this)} style={styles.StartButton} >
-                                        <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Pause </Text>
+                                        <Text style={!this.state.loading ?  styles.text2 : {display:'none'}}> Start </Text>
                                         <ActivityIndicator 
                                             style={this.state.loading ?  styles.text2 : {display:'none'}}
                                             size="large" 

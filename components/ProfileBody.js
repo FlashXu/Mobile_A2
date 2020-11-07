@@ -19,8 +19,7 @@ class ProfileBody extends Component {
         var opDBdata = this.bodyOperation;
         var storeinfo = this.storeData;
         var pageObj = this;
-
-          
+        
         
         // var downloadImg = this.downloadPhoto;
         
@@ -148,26 +147,30 @@ class ProfileBody extends Component {
             {id:'None', totalDistance:'None',avgSpeed:'None',dateOfCompletion:'None',mapImage:require('../assets/map1.png')}
           ],
           coordinates :[],
-          showMap :false
+          coordinatesLoaded : false,
+          showMap :false,
+          loadingMap: false,
         }
     }
 
     popUpMap(value) {
 
       // alert("Map for " + value.id);
-      this.setState({showMap:true})
+      this.setState({loadingMap:true})
       
       this.get_attachments('running_record', value.id, 'coordinate.json').then((res) => {
         if(res == null){
           alert('There is no coordinate data.');
+          this.setState({loadingMap:false});
         }else if(res.hasOwnProperty('resp')){
           alert('There is no coordinate data.');
+          this.setState({loadingMap:false});
         }else{
           for(i=0;i<res.coordinate.length;i++){
             var currentPosition = {latitude:res.coordinate[i][1],longitude:res.coordinate[i][0]} ;
             this.setState({coordinates: this.state.coordinates.concat([currentPosition])})
           }
-          
+          this.setState({coordinatesLoaded: true, loadingMap:false, showMap: true});
         }
       });
       
@@ -375,6 +378,11 @@ class ProfileBody extends Component {
 
       return (
         <View>
+          <ActivityIndicator 
+              style={context.state.loadingMap && !postId ?  styles.text2 : {display:'none'}}
+              size="large" 
+              color="white" 
+          />
           {
             trainingSessions.map((value,i)=>{
               return (
@@ -389,8 +397,6 @@ class ProfileBody extends Component {
                       <TouchableOpacity onPress={()=>context.popUpMap(value)} style={{flex:1, alignItems:"center"}}>
                         <Image  source={trainingSessions[i].mapImage} style={styles.image} />
                       </TouchableOpacity>
-                      
-                     
                     </TouchableOpacity>
                     
               );
@@ -479,15 +485,6 @@ class ProfileBody extends Component {
               
             <View style={styles.centeredView}>
 
-            {/* <MapView
-                    style={styles.map}
-                    showsUserLocation={true}
-
-                    followsUserLocation={true}
-                    //region={this.getMapRegion()}
-                >
-                <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
-                </MapView> */}
 
               <View style={styles.modalView}>
               
@@ -549,16 +546,35 @@ class ProfileBody extends Component {
               this.setState({showMap:false})
             }}
           >
-            <MapView
-                style={styles.map}
-                showsUserLocation={true}
 
-                followsUserLocation={true}
-                //region={this.getMapRegion()}
-            >
-            <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#2A2E43"/>
-            </MapView>
+            
 
+            {(() => {
+                if (this.state.coordinatesLoaded) {
+                    return <TouchableOpacity onPress={()=>this.setState({showMap:false})}>
+
+                        <MapView
+                        style={styles.map}
+                        region={{
+                            latitude: this.state.coordinates[0].latitude,
+                            longitude: this.state.coordinates[0].longitude,
+                            latitudeDelta: 0.005,
+                            longitudeDelta: 0.005,
+                            // latitudeDelta: Math.abs(this.state.coordinates[Math.floor((this.state.coordinates.length)/2)].latitude - this.state.coordinates[0].latitude) * 8,
+                            // longitudeDelta: Math.abs(this.state.coordinates[Math.floor((this.state.coordinates.length)/2)].longitude - this.state.coordinates[0].longitude) * 8,
+                          
+                        }}
+                        >
+                        <MapView.Marker coordinate={this.state.coordinates[0]} />
+                        <MapView.Marker coordinate={this.state.coordinates[this.state.coordinates.length-1]} />
+                        <Polyline coordinates={this.state.coordinates} strokeWidth={5} strokeColor="#474BD9"/>
+                        </MapView> 
+
+                    </TouchableOpacity>
+                  
+
+                } 
+            })()}
 
             <TouchableOpacity 
               style={styles.exitZoom} 
@@ -736,10 +752,10 @@ const styles = StyleSheet.create({
   map: {
     position: 'relative',
     alignItems: "center",
-    height: 300,
+    height: 0.85*h,
   },
   exitZoom: {
-    height:0.6 * h
+    height:0.2 * h
   }
 
 });
