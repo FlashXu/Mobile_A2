@@ -55,26 +55,26 @@
 
 ## Compile and Run the App
 * Please install [Node.js and npm.](https://nodejs.org/en/download/)
-<br>
+<br/>
 * Installing react native, please run: 
-<br>  `npm install -g react-native-cli`.
-<br>
+<br/>  `npm install -g react-native-cli`.
+<br/>
 * Installing expo, please run: 
-<br>  `npm install -g expo-cli`.
-<br>
+<br/>  `npm install -g expo-cli`.
+<br/>
 * Installing dependencies, please locate to the app file and run: 
-<br>  `npm install`.
-<br>
+<br/>  `npm install`.
+<br/>
 * Starting expo, please run: 
-<br>  `expo start`.
-<br>
+<br/>  `expo start`.
+<br/>
 * After running `expo start`, the default browser will open a new tab at http://localhost:19002/, where you can click different buttons on the left sidebar to run the app:
-<br>(1) Run on Android device/emulator.
-<br>(2) Run on iOS simulator.
-<br>(3) Run in web browser. (Not suggested, since some functions do not compatible in web.)
-<br>If you have correctly installed corresponding Android or iOS simulator, clicking (1) or (2) will automatically run the app on the simulator. 
-<br>
+<br/>(1) Run on Android device/emulator.
+<br/>(2) Run on iOS simulator.
+<br/>(3) Run in web browser. (Not suggested, since some functions do not compatible in web.)
+<br/>If you have correctly installed corresponding Android or iOS simulator, clicking (1) or (2) will automatically run the app on the simulator. 
+<br/>
 * To run the app on Android Studio, please install [Android Studio](https://developer.android.com/studio) and virtual devices. For instructions about setting up the android virtual device, please refer to [https://developer.android.com/studio/run/managing-avds](https://developer.android.com/studio/run/managing-avds). By openning your android virtual device in Android Studio, then clicking on 'Run on Android device/emulator', you can run our app on the virtual device. 
-<br>
+<br/>
 * To run the app on expo app, please install expo app on your smartphone from APP Store (iOS) or Google Play (Android). By running `expo start`  to start building app on expo and openning expo app on your smartphone, you can test our app on expo app.
 
