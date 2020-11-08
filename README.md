@@ -62,7 +62,8 @@
 * Installing dependencies, please locate to the app file and run:
 <br>  `npm install`.
  
-* Starting expo, please run:  `expo start`.
+* Starting expo, please run:
+<br>  `expo start`.
 
 * After running `expo start`, the default browser will open a new tab at http://localhost:19002/, where you can click different buttons on the left sidebar to run the app:
 <br>(1) Run on Android device/emulator.
