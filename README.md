@@ -61,7 +61,7 @@
 <br>  `npm install -g expo-cli`.
 * Installing dependencies, please locate to the app file and run:
 <br>  `npm install`.
- 
+
 * Starting expo, please run:
 <br>  `expo start`.
 
@@ -74,4 +74,7 @@
 * To run the app on Android Studio, please install [Android Studio](https://developer.android.com/studio) and virtual devices. For instructions about setting up the android virtual device, please refer to [https://developer.android.com/studio/run/managing-avds](https://developer.android.com/studio/run/managing-avds). By opening your android virtual device in Android Studio, then clicking on 'Run on Android device/emulator', you can run our app on the virtual device.   
   
 * To run the app on expo app, please install expo app on your smartphone from APP Store (iOS) or Google Play (Android). By running `expo start`  to start building the app on expo and opnning expo app on your smartphone, you can test our app on expo app.  
+
+## Demo Video YouTube Link:
+* [https://www.youtube.com/watch?v=zbvs_Y_-cbE](https://www.youtube.com/watch?v=zbvs_Y_-cbE)
 
