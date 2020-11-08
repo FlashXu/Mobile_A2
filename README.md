@@ -52,3 +52,22 @@
 ## API Files
 * [API file: https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0](https://app.swaggerhub.com/apis/FlashXu/mobile_http_api/1.0.0)
 * [API deployment: http://www.mobileappproj.ml:8080/ui](http://www.mobileappproj.ml:8080/ui)
+
+## Compile and Run the App
+* Please install [Node.js and npm.](https://nodejs.org/en/download/)
+* Installing react native, please run: 
+	`npm install -g react-native-cli`.
+* Installing expo, please run: 
+	`npm install -g expo-cli`.
+* Installing dependencies, please locate to the app file and run: 
+	`npm install`.
+* Starting expo, please run: 
+	`expo start`.
+* After running `expo start`, the default browser will open a new tab at http://localhost:19002/, where you can click different buttons on the left sidebar to run the app:
+(1) Run on Android device/emulator.
+(2) Run on iOS simulator.
+(3) Run in web browser. (Not suggested, since some functions do not compatible in web.)
+If you have correctly installed corresponding Android or iOS simulator, clicking (1) and (2) will automatically run the app on the simulator. 
+* To run the app on Android Studio, please install [Android Studio](https://developer.android.com/studio) and virtual devices. For instructions about setting up the android virtual device, please refer to [https://developer.android.com/studio/run/managing-avds](https://developer.android.com/studio/run/managing-avds). By openning your android virtual device in Android Studio, then clicking on 'Run on Android device/emulator', you can run our app on the virtual device. 
+* To run the app on expo app, please install expo app on your smartphone from APP Store(ios) or Google Play(android). By running `expo start`  to start building app on expo and openning expo app on your smartphone, you can test our app on expo app.
+
